@@ -1,16 +1,44 @@
 #!/bin/sh
 set -e
 
+require_db_config() {
+    if [ -z "${PG_DATABASE_URL}" ]; then
+        echo "ERROR: PG_DATABASE_URL is not set, cannot run database setup." >&2
+        echo "       Twenty reads PG_DATABASE_URL, not DATABASE_URL." >&2
+        echo "       Railway: PG_DATABASE_URL=\${{ Postgres.DATABASE_PRIVATE_URL }}" >&2
+        exit 1
+    fi
+
+    case "${PG_DATABASE_URL}" in
+        postgres://* | postgresql://*) ;;
+        *)
+            echo "ERROR: PG_DATABASE_URL must be a postgres:// or postgresql:// URL." >&2
+            exit 1
+            ;;
+    esac
+
+    if [ -z "${REDIS_URL}" ]; then
+        echo "WARNING: REDIS_URL is not set. The server and worker will fail to start." >&2
+    fi
+}
+
 setup_and_migrate_db() {
     if [ "${DISABLE_DB_MIGRATIONS}" = "true" ]; then
         echo "Database setup and migrations are disabled, skipping..."
         return
     fi
 
+    require_db_config
+
     echo "Running database setup and migrations..."
 
     # Run setup and migration scripts
-    has_schema=$(psql -tAc "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'core')" ${PG_DATABASE_URL})
+    if ! has_schema=$(psql -tAc "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = 'core')" "${PG_DATABASE_URL}"); then
+        echo "ERROR: could not query Postgres with the configured PG_DATABASE_URL." >&2
+        echo "       Check the database service is running and its host is reachable from this service." >&2
+        exit 1
+    fi
+
     if [ "$has_schema" = "f" ]; then
         echo "Database appears to be empty, running migrations."
         yarn database:init:prod
