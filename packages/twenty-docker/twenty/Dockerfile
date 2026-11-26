@@ -339,3 +339,8 @@ ENTRYPOINT ["/init"]
 # ===========================================================================
 
 FROM twenty AS production
+
+# Declare the listening port so hosting platforms (Railway, Render, Fly) can
+# auto-detect it. Twenty reads NODE_PORT, not PORT, so the default is pinned here.
+ENV NODE_PORT=3000
+EXPOSE 3000
