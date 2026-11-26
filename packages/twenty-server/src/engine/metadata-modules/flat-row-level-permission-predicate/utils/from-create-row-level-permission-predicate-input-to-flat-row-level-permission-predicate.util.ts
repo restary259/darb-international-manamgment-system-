@@ -1,0 +1,101 @@
+import { type FlatApplication } from 'src/engine/core-modules/application/types/flat-application.type';
+import { type AllFlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/types/all-flat-entity-maps.type';
+import { type FlatEntityMaps } from 'src/engine/metadata-modules/flat-entity/types/flat-entity-maps.type';
+import { resolveEntityRelationUniversalIdentifiers } from 'src/engine/metadata-modules/flat-entity/utils/resolve-entity-relation-universal-identifiers.util';
+import { type FlattenedRowLevelPermissionPredicateInput } from 'src/engine/metadata-modules/row-level-permission-predicate/types/flattened-row-level-permission-rule-inputs.type';
+import { type FlatRowLevelPermissionPredicateGroup } from 'src/engine/metadata-modules/row-level-permission-predicate/types/flat-row-level-permission-predicate-group.type';
+import { type FlatRowLevelPermissionPredicate } from 'src/engine/metadata-modules/row-level-permission-predicate/types/flat-row-level-permission-predicate.type';
+
+export const fromCreateRowLevelPermissionPredicateInputToFlatRowLevelPermissionPredicate =
+  ({
+    input,
+    roleId,
+    objectMetadataId,
+    workspaceId,
+    roleUniversalIdentifier,
+    objectMetadataUniversalIdentifier,
+    flatApplication,
+    rowLevelPermissionRuleUniversalIdentifier,
+    flatFieldMetadataMaps,
+    flatRowLevelPermissionPredicateGroupMaps,
+  }: {
+    input: FlattenedRowLevelPermissionPredicateInput;
+    roleId: string;
+    objectMetadataId: string;
+    workspaceId: string;
+    roleUniversalIdentifier: string;
+    objectMetadataUniversalIdentifier: string;
+    flatApplication: FlatApplication;
+    rowLevelPermissionRuleUniversalIdentifier: string;
+  } & Pick<AllFlatEntityMaps, 'flatFieldMetadataMaps'> & {
+      flatRowLevelPermissionPredicateGroupMaps: FlatEntityMaps<FlatRowLevelPermissionPredicateGroup>;
+    }): FlatRowLevelPermissionPredicate => {
+    const createdAt = new Date().toISOString();
+
+    const {
+      fieldMetadataUniversalIdentifier,
+      relationFieldMetadataUniversalIdentifier,
+      rowLevelPermissionPredicateGroupUniversalIdentifier,
+      workspaceMemberFieldMetadataUniversalIdentifier,
+      workspaceMemberRelationFieldMetadataUniversalIdentifier,
+      workspaceMemberRelationFilterFieldMetadataUniversalIdentifier,
+    } = resolveEntityRelationUniversalIdentifiers({
+      metadataName: 'rowLevelPermissionPredicate',
+      foreignKeyValues: {
+        fieldMetadataId: input.fieldMetadataId,
+        relationFieldMetadataId: input.relationFieldMetadataId,
+        rowLevelPermissionPredicateGroupId:
+          input.rowLevelPermissionPredicateGroupId,
+        workspaceMemberFieldMetadataId: input.workspaceMemberFieldMetadataId,
+        workspaceMemberRelationFieldMetadataId:
+          input.workspaceMemberRelationFieldMetadataId,
+        workspaceMemberRelationFilterFieldMetadataId:
+          input.workspaceMemberRelationFilterFieldMetadataId,
+      },
+      flatEntityMaps: {
+        flatFieldMetadataMaps,
+        flatRowLevelPermissionPredicateGroupMaps,
+      },
+    });
+
+    return {
+      id: input.id,
+      workspaceId,
+      roleId,
+      roleUniversalIdentifier,
+      objectMetadataId,
+      objectMetadataUniversalIdentifier,
+      fieldMetadataId: input.fieldMetadataId,
+      fieldMetadataUniversalIdentifier,
+      relationFieldMetadataId: input.relationFieldMetadataId ?? null,
+      relationFieldMetadataUniversalIdentifier,
+      operand: input.operand,
+      value: input.value ?? null,
+      subFieldName: input.subFieldName ?? null,
+      workspaceMemberFieldMetadataId:
+        input.workspaceMemberFieldMetadataId ?? null,
+      workspaceMemberFieldMetadataUniversalIdentifier,
+      workspaceMemberSubFieldName: input.workspaceMemberSubFieldName ?? null,
+      workspaceMemberRelationFieldMetadataId:
+        input.workspaceMemberRelationFieldMetadataId ?? null,
+      workspaceMemberRelationFieldMetadataUniversalIdentifier,
+      workspaceMemberRelationFilterFieldMetadataId:
+        input.workspaceMemberRelationFilterFieldMetadataId ?? null,
+      workspaceMemberRelationFilterFieldMetadataUniversalIdentifier,
+      workspaceMemberRelationFilterValues:
+        input.workspaceMemberRelationFilterValues ?? null,
+      rowLevelPermissionPredicateGroupId:
+        input.rowLevelPermissionPredicateGroupId,
+      rowLevelPermissionPredicateGroupUniversalIdentifier,
+      rowLevelPermissionRuleId: input.rowLevelPermissionRuleId,
+      rowLevelPermissionRuleUniversalIdentifier,
+      positionInRowLevelPermissionPredicateGroup:
+        input.positionInRowLevelPermissionPredicateGroup,
+      createdAt,
+      updatedAt: createdAt,
+      deletedAt: null,
+      universalIdentifier: input.id,
+      applicationId: flatApplication.id,
+      applicationUniversalIdentifier: flatApplication.universalIdentifier,
+    };
+  };

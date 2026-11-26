@@ -1,0 +1,24 @@
+import { type RecordBoardFieldDefinition } from '@/object-record/record-board/types/RecordBoardFieldDefinition';
+import { type FieldMetadata } from '@/object-record/record-field/ui/types/FieldMetadata';
+import { type AggregateOperations } from '@/object-record/record-table/constants/AggregateOperations';
+import { type ColumnDefinition } from '@/object-record/record-table/types/ColumnDefinition';
+import { type ViewFieldRelationScope } from 'twenty-shared/types';
+
+export type ViewField = {
+  id: string;
+  viewId?: string;
+  fieldMetadataId: string;
+  position: number;
+  isActive: boolean;
+  isVisible: boolean;
+  isCanonical?: boolean;
+  size: number;
+  aggregateOperation?: AggregateOperations | null;
+  viewFieldGroupId?: string | null;
+  relationTargetFieldMetadataId?: string | null;
+  relationScope?: ViewFieldRelationScope | null;
+  label?: string | null;
+  definition?:
+    | ColumnDefinition<FieldMetadata>
+    | RecordBoardFieldDefinition<FieldMetadata>;
+};

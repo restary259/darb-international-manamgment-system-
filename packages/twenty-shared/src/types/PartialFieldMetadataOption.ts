@@ -1,0 +1,9 @@
+export type PartialFieldMetadataItemOption = {
+  id: string;
+  label: string;
+  position: number;
+  value: string;
+  description?: string | null;
+  isActive?: boolean;
+  applicationId?: string;
+};

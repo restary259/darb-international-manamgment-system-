@@ -1,0 +1,1187 @@
+/* @license Enterprise */
+
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+
+import {
+  assertIsDefinedOrThrow,
+  assertUnreachable,
+  findOrThrow,
+  isDefined,
+} from 'twenty-shared/utils';
+import { In, type Repository } from 'typeorm';
+
+import Stripe from 'stripe';
+
+import {
+  BillingException,
+  BillingExceptionCode,
+} from 'src/engine/core-modules/billing/billing.exception';
+import { BILLING_SUBSCRIPTION_STATE_LOCK_OPTIONS } from 'src/engine/core-modules/billing/constants/billing-subscription-state-lock-options.constant';
+import { billingValidator } from 'src/engine/core-modules/billing/billing.validate';
+import { BillingPriceEntity } from 'src/engine/core-modules/billing/entities/billing-price.entity';
+import { BillingSubscriptionEntity } from 'src/engine/core-modules/billing/entities/billing-subscription.entity';
+import { BillingPlanKey } from 'src/engine/core-modules/billing/enums/billing-plan-key.enum';
+import { BillingProductKey } from 'src/engine/core-modules/billing/enums/billing-product-key.enum';
+import { SubscriptionInterval } from 'src/engine/core-modules/billing/enums/billing-subscription-interval.enum';
+import { SubscriptionStatus } from 'src/engine/core-modules/billing/enums/billing-subscription-status.enum';
+import { BillingApplicationProductService } from 'src/engine/core-modules/billing/services/billing-application-product.service';
+import { BillingApplicationSyncService } from 'src/engine/core-modules/billing/services/billing-application-sync.service';
+import { BillingPriceService } from 'src/engine/core-modules/billing/services/billing-price.service';
+import { BillingProductService } from 'src/engine/core-modules/billing/services/billing-product.service';
+import { BillingSeatService } from 'src/engine/core-modules/billing/services/billing-seat.service';
+import { BillingSubscriptionService } from 'src/engine/core-modules/billing/services/billing-subscription.service';
+import { StripeInvoiceService } from 'src/engine/core-modules/billing/stripe/services/stripe-invoice.service';
+import { StripeSubscriptionScheduleService } from 'src/engine/core-modules/billing/stripe/services/stripe-subscription-schedule.service';
+import { StripeSubscriptionService } from 'src/engine/core-modules/billing/stripe/services/stripe-subscription.service';
+import {
+  type SubscriptionUpdate,
+  SubscriptionUpdateType,
+} from 'src/engine/core-modules/billing/types/billing-subscription-update.type';
+import { buildApplicationItemsForInterval } from 'src/engine/core-modules/billing/utils/build-application-items-for-interval.util';
+import { computeImmediateSubscriptionUpdate } from 'src/engine/core-modules/billing/utils/compute-immediate-subscription-update.util';
+import { computeSubscriptionUpdateOptions } from 'src/engine/core-modules/billing/utils/compute-subscription-update-options.util';
+import { findSellableBaseProductPriceOrThrow } from 'src/engine/core-modules/billing/utils/find-sellable-base-product-price-or-throw.util';
+import { findProductPriceForIntervalOrThrow } from 'src/engine/core-modules/billing/utils/find-product-price-for-interval-or-throw.util';
+import { isResourceCreditPriceForSubscription } from 'src/engine/core-modules/billing/utils/is-resource-credit-price-for-subscription.util';
+import { isSellableCatalogPrice } from 'src/engine/core-modules/billing/utils/is-sellable-catalog-price.util';
+import { isSendInvoiceSubscription } from 'src/engine/core-modules/billing/utils/is-send-invoice-subscription.util';
+import { isSubscriptionQuantityIncrease } from 'src/engine/core-modules/billing/utils/is-subscription-quantity-increase.util';
+import { getBaseProductSubscriptionItemOrThrow } from 'src/engine/core-modules/billing/utils/get-base-product-subscription-item-or-throw.util';
+import { getBillingPlanConfig } from 'src/engine/core-modules/billing/utils/get-billing-plan-config.util';
+import { getPlanSwitchOrThrow } from 'src/engine/core-modules/billing/utils/get-plan-switch-or-throw.util';
+import { getCurrentResourceCreditSubscriptionItemOrThrow } from 'src/engine/core-modules/billing/utils/get-resource-credit-subscription-item-or-throw.util';
+import { normalizePriceRef } from 'src/engine/core-modules/billing/utils/normalize-price-ref.utils';
+import { buildSchedulePhasesUpdate } from 'src/engine/core-modules/billing/utils/build-schedule-phases-update.util';
+import { buildSubscriptionItemsUpdate } from 'src/engine/core-modules/billing/utils/build-subscription-items-update.util';
+import { isSamePhaseSignature } from 'src/engine/core-modules/billing/utils/is-same-phase-signature.util';
+import { toPhaseUpdateParams } from 'src/engine/core-modules/billing/utils/to-phase-update-params.util';
+import { type SubscriptionStripePrices } from 'src/engine/core-modules/billing/types/subscription-stripe-prices.type';
+import { type TargetApplicationProduct } from 'src/engine/core-modules/billing/types/target-application-product.type';
+import { TwentyConfigService } from 'src/engine/core-modules/twenty-config/twenty-config.service';
+import { type WorkspaceEntity } from 'src/engine/core-modules/workspace/workspace.entity';
+import { buildBillingSubscriptionStateLockKey } from 'src/engine/core-modules/billing/utils/build-billing-subscription-state-lock-key.util';
+import { buildBillingSubscriptionUpdateLockKey } from 'src/engine/core-modules/billing/utils/build-billing-subscription-update-lock-key.util';
+import { CacheLockService } from 'src/engine/core-modules/cache-lock/cache-lock.service';
+import { InjectWorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/inject-workspace-scoped-repository.decorator';
+import { WorkspaceScopedRepository } from 'src/engine/twenty-orm/workspace-scoped-repository/workspace-scoped-repository';
+@Injectable()
+export class BillingSubscriptionUpdateService {
+  protected readonly logger = new Logger(BillingSubscriptionUpdateService.name);
+
+  constructor(
+    private readonly stripeSubscriptionService: StripeSubscriptionService,
+    private readonly stripeInvoiceService: StripeInvoiceService,
+    private readonly billingPriceService: BillingPriceService,
+    private readonly billingProductService: BillingProductService,
+    @InjectRepository(BillingPriceEntity)
+    private readonly billingPriceRepository: Repository<BillingPriceEntity>,
+    @InjectWorkspaceScopedRepository(BillingSubscriptionEntity)
+    private readonly billingSubscriptionRepository: WorkspaceScopedRepository<BillingSubscriptionEntity>,
+    private readonly stripeSubscriptionScheduleService: StripeSubscriptionScheduleService,
+    private readonly billingSubscriptionService: BillingSubscriptionService,
+    private readonly billingSeatService: BillingSeatService,
+    private readonly billingApplicationProductService: BillingApplicationProductService,
+    private readonly billingApplicationSyncService: BillingApplicationSyncService,
+    private readonly twentyConfigService: TwentyConfigService,
+    private readonly cacheLockService: CacheLockService,
+  ) {}
+
+  async changeResourceCreditPrice(
+    workspaceId: string,
+    resourceCreditPriceId: string,
+  ): Promise<void> {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscriptionOrThrow(
+        { workspaceId },
+      );
+
+    const newResourceCreditPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: resourceCreditPriceId },
+        relations: ['billingProduct'],
+      });
+
+    const currentPlanKey =
+      getBaseProductSubscriptionItemOrThrow(billingSubscription).billingProduct
+        ?.metadata.planKey;
+
+    if (
+      !isResourceCreditPriceForSubscription({
+        billingPrice: newResourceCreditPrice,
+        interval: billingSubscription.interval,
+        planKey: currentPlanKey,
+      })
+    ) {
+      throw new BillingException(
+        `Resource credit price ${resourceCreditPriceId} does not match the subscription interval and plan`,
+        BillingExceptionCode.BILLING_PRICE_INVALID,
+      );
+    }
+
+    if (!isSellableCatalogPrice(newResourceCreditPrice)) {
+      throw new BillingException(
+        `Resource credit price ${resourceCreditPriceId} is no longer sold`,
+        BillingExceptionCode.BILLING_PRICE_INVALID,
+      );
+    }
+
+    const subscriptionUpdate = {
+      type: SubscriptionUpdateType.RESOURCE_CREDIT_PRICE,
+      newResourceCreditPriceId: resourceCreditPriceId,
+    } as const;
+
+    await this.updateSubscription(
+      workspaceId,
+      billingSubscription.id,
+      subscriptionUpdate,
+    );
+  }
+
+  async cancelSwitchResourceCreditPrice(
+    workspace: WorkspaceEntity,
+  ): Promise<void> {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscriptionOrThrow(
+        { workspaceId: workspace.id },
+      );
+
+    const currentResourceCreditPrice =
+      getCurrentResourceCreditSubscriptionItemOrThrow(billingSubscription);
+    const subscriptionUpdate = {
+      type: SubscriptionUpdateType.RESOURCE_CREDIT_PRICE,
+      newResourceCreditPriceId: currentResourceCreditPrice.stripePriceId,
+    } as const;
+
+    await this.updateSubscription(
+      workspace.id,
+      billingSubscription.id,
+      subscriptionUpdate,
+    );
+  }
+
+  async cancelSwitchPlan(workspaceId: string) {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscriptionOrThrow(
+        { workspaceId },
+      );
+
+    const currentPlan =
+      getBaseProductSubscriptionItemOrThrow(billingSubscription).billingProduct
+        ?.metadata.planKey;
+
+    assertIsDefinedOrThrow(currentPlan);
+
+    await this.updateSubscription(workspaceId, billingSubscription.id, {
+      type: SubscriptionUpdateType.PLAN,
+      newPlan: currentPlan,
+    });
+  }
+
+  async cancelSwitchInterval(workspaceId: string) {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscriptionOrThrow(
+        { workspaceId },
+      );
+
+    const currentInterval = billingSubscription.interval;
+
+    await this.updateSubscription(workspaceId, billingSubscription.id, {
+      type: SubscriptionUpdateType.INTERVAL,
+      newInterval: currentInterval,
+    });
+  }
+
+  async changeInterval(workspaceId: string) {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscriptionOrThrow(
+        { workspaceId },
+      );
+
+    const currentInterval = billingSubscription.interval;
+
+    await this.updateSubscription(workspaceId, billingSubscription.id, {
+      type: SubscriptionUpdateType.INTERVAL,
+      newInterval:
+        currentInterval === SubscriptionInterval.Month
+          ? SubscriptionInterval.Year
+          : SubscriptionInterval.Month,
+    });
+  }
+
+  async changePlan(workspaceId: string, targetPlanKey?: BillingPlanKey) {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscriptionOrThrow(
+        { workspaceId },
+      );
+
+    const currentPlanKey =
+      getBaseProductSubscriptionItemOrThrow(billingSubscription).billingProduct
+        ?.metadata.planKey;
+
+    assertIsDefinedOrThrow(currentPlanKey);
+
+    const planSwitch = getPlanSwitchOrThrow({
+      currentPlanKey,
+      targetPlanKey,
+      plansConfig: this.twentyConfigService.get('BILLING_PLANS'),
+    });
+
+    await this.updateSubscription(workspaceId, billingSubscription.id, {
+      type: SubscriptionUpdateType.PLAN,
+      newPlan: planSwitch.targetPlanKey,
+    });
+  }
+
+  async syncSeats({
+    workspaceId,
+    renewalDate,
+  }: {
+    workspaceId: string;
+    renewalDate?: Date;
+  }) {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscription({
+        workspaceId,
+      });
+
+    if (!isDefined(billingSubscription)) {
+      return;
+    }
+
+    await this.withSubscriptionUpdateLock({
+      workspaceId,
+      update: async () => {
+        const billedSeats =
+          await this.billingSeatService.computeCurrentBilledSeats(workspaceId);
+
+        if (!isDefined(billedSeats)) {
+          return;
+        }
+
+        await this.applySubscriptionUpdate({
+          workspaceId,
+          subscriptionId: billingSubscription.id,
+          subscriptionUpdate: {
+            type: SubscriptionUpdateType.QUANTITIES,
+            newSeats: billedSeats,
+          },
+          renewalDate,
+        });
+      },
+    });
+  }
+
+  async chargeApplications({
+    workspaceId,
+  }: {
+    workspaceId: string;
+  }): Promise<{ isPaymentDeclined: boolean }> {
+    const { isPaymentDeclined } = await this.chargeApplicationsThenPersist({
+      workspaceId,
+      persist: async () => undefined,
+    });
+
+    return { isPaymentDeclined };
+  }
+
+  // Charging and persisting share the subscription update lock so concurrent connections cannot count the same account twice
+  async chargeApplicationsThenPersist<TPersisted>({
+    workspaceId,
+    additionalConnectedAccountApplicationId,
+    persist,
+  }: {
+    workspaceId: string;
+    additionalConnectedAccountApplicationId?: string;
+    persist: () => Promise<TPersisted>;
+  }): Promise<
+    | { isPaymentDeclined: true }
+    | { isPaymentDeclined: false; isCharged: boolean; persisted: TPersisted }
+  > {
+    if (!this.billingApplicationSyncService.isApplicationBillingActive()) {
+      return {
+        isPaymentDeclined: false,
+        isCharged: false,
+        persisted: await persist(),
+      };
+    }
+
+    await this.billingApplicationProductService.createMissingProducts(
+      workspaceId,
+    );
+
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscription({
+        workspaceId,
+      });
+
+    if (!isDefined(billingSubscription)) {
+      return {
+        isPaymentDeclined: false,
+        isCharged: false,
+        persisted: await persist(),
+      };
+    }
+
+    const applyApplicationsUpdate = (
+      chargedConnectedAccountApplicationId?: string,
+    ) =>
+      this.applySubscriptionUpdate({
+        workspaceId,
+        subscriptionId: billingSubscription.id,
+        subscriptionUpdate: {
+          type: SubscriptionUpdateType.APPLICATIONS,
+          additionalConnectedAccountApplicationId:
+            chargedConnectedAccountApplicationId,
+        },
+      });
+
+    return await this.cacheLockService.withLock(
+      async () => {
+        try {
+          await applyApplicationsUpdate(
+            additionalConnectedAccountApplicationId,
+          );
+        } catch (error) {
+          if (error instanceof Stripe.errors.StripeCardError) {
+            this.logger.warn(
+              `Application charge declined for workspace ${workspaceId}: ${error.message}`,
+            );
+
+            return { isPaymentDeclined: true as const };
+          }
+
+          throw error;
+        }
+
+        try {
+          return {
+            isPaymentDeclined: false as const,
+            isCharged: true,
+            persisted: await persist(),
+          };
+        } catch (error) {
+          if (isDefined(additionalConnectedAccountApplicationId)) {
+            await applyApplicationsUpdate();
+          }
+
+          throw error;
+        }
+      },
+      buildBillingSubscriptionUpdateLockKey(workspaceId),
+      BILLING_SUBSCRIPTION_STATE_LOCK_OPTIONS,
+    );
+  }
+
+  async syncApplications({
+    workspaceId,
+  }: {
+    workspaceId: string;
+  }): Promise<void> {
+    const billingSubscription =
+      await this.billingSubscriptionService.getCurrentBillingSubscription({
+        workspaceId,
+      });
+
+    if (!isDefined(billingSubscription)) {
+      return;
+    }
+
+    await this.updateSubscription(workspaceId, billingSubscription.id, {
+      type: SubscriptionUpdateType.APPLICATIONS,
+    });
+  }
+
+  async updateSubscription(
+    workspaceId: string,
+    subscriptionId: string,
+    subscriptionUpdate: SubscriptionUpdate,
+  ): Promise<void> {
+    await this.withSubscriptionUpdateLock({
+      workspaceId,
+      update: () =>
+        this.applySubscriptionUpdate({
+          workspaceId,
+          subscriptionId,
+          subscriptionUpdate,
+        }),
+    });
+  }
+
+  private async withSubscriptionUpdateLock({
+    workspaceId,
+    update,
+  }: {
+    workspaceId: string;
+    update: () => Promise<void>;
+  }): Promise<void> {
+    await this.cacheLockService.withLock(
+      update,
+      buildBillingSubscriptionUpdateLockKey(workspaceId),
+      BILLING_SUBSCRIPTION_STATE_LOCK_OPTIONS,
+    );
+  }
+
+  private async applySubscriptionUpdate({
+    workspaceId,
+    subscriptionId,
+    subscriptionUpdate,
+    renewalDate,
+  }: {
+    workspaceId: string;
+    subscriptionId: string;
+    subscriptionUpdate: SubscriptionUpdate;
+    renewalDate?: Date;
+  }): Promise<void> {
+    const subscription = await this.billingSubscriptionRepository.findOneOrFail(
+      workspaceId,
+      {
+        where: { id: subscriptionId },
+        relations: [
+          'billingSubscriptionItems',
+          'billingSubscriptionItems.billingProduct',
+        ],
+      },
+    );
+
+    const {
+      subscription: stripeSubscription,
+      schedule,
+      currentPhase,
+      nextPhase,
+    } = await this.stripeSubscriptionScheduleService.loadSubscriptionSchedule(
+      subscription.stripeSubscriptionId,
+    );
+
+    const currentPrices = await this.getSubscriptionPricesFromItems(
+      stripeSubscription.items.data,
+    );
+
+    const seats = await this.computeTargetSeats({
+      workspaceId,
+      subscriptionUpdate,
+      currentSeats: currentPrices.seats,
+    });
+
+    const targetApplicationProducts =
+      await this.billingApplicationProductService.findTargetApplicationProducts(
+        {
+          workspaceId,
+          subscribedStripeProductIds: currentPrices.applicationItems.map(
+            ({ stripeProductId }) => stripeProductId,
+          ),
+          additionalConnectedAccountApplicationId:
+            subscriptionUpdate.type === SubscriptionUpdateType.APPLICATIONS
+              ? subscriptionUpdate.additionalConnectedAccountApplicationId
+              : undefined,
+        },
+      );
+
+    const updateApplicationProducts =
+      subscriptionUpdate.type === SubscriptionUpdateType.APPLICATIONS
+        ? targetApplicationProducts
+        : targetApplicationProducts.filter(({ billingProduct }) =>
+            currentPrices.applicationItems.some(
+              ({ stripeProductId }) =>
+                stripeProductId === billingProduct.stripeProductId,
+            ),
+          );
+
+    const toUpdateCurrentPrices = await this.computeTargetSubscriptionPrices({
+      subscriptionUpdate,
+      prices: { ...currentPrices, seats },
+      targetApplicationProducts: updateApplicationProducts,
+    });
+
+    const shouldUpdateAtPeriodEnd =
+      await this.shouldUpdateAtSubscriptionPeriodEnd(
+        subscription,
+        subscriptionUpdate,
+      );
+
+    if (shouldUpdateAtPeriodEnd) {
+      if (!isDefined(schedule)) {
+        const { schedule, currentPhase } =
+          await this.stripeSubscriptionScheduleService.createSubscriptionSchedule(
+            subscription.stripeSubscriptionId,
+          );
+
+        await this.runSubscriptionScheduleUpdate({
+          stripeScheduleId: schedule.id,
+          toUpdateCurrentPrices: undefined,
+          toUpdateNextPrices: toUpdateCurrentPrices,
+          currentPhase: toPhaseUpdateParams(currentPhase),
+          subscriptionCurrentPeriodEnd:
+            stripeSubscription.items.data[0].current_period_end,
+        });
+      } else {
+        assertIsDefinedOrThrow(nextPhase);
+        assertIsDefinedOrThrow(currentPhase);
+
+        const nextPhasePrices = await this.getSubscriptionPricesFromItems(
+          nextPhase.items,
+        );
+
+        const toUpdateNextPrices = await this.computeTargetSubscriptionPrices({
+          subscriptionUpdate,
+          prices: nextPhasePrices,
+          targetApplicationProducts: updateApplicationProducts,
+        });
+
+        await this.runSubscriptionScheduleUpdate({
+          stripeScheduleId: schedule.id,
+          toUpdateNextPrices,
+          toUpdateCurrentPrices: undefined,
+          currentPhase: toPhaseUpdateParams(currentPhase),
+          nextPhase: toPhaseUpdateParams(nextPhase),
+          subscriptionCurrentPeriodEnd:
+            stripeSubscription.items.data[0].current_period_end,
+        });
+      }
+    } else {
+      const immediateSubscriptionUpdate = computeImmediateSubscriptionUpdate({
+        subscriptionUpdate,
+        currentPrices,
+        toUpdatePrices: toUpdateCurrentPrices,
+      });
+
+      const updatedStripeSubscription = isDefined(immediateSubscriptionUpdate)
+        ? await this.applyImmediateSubscriptionUpdate({
+            subscription,
+            stripeSubscriptionItems: stripeSubscription.items.data,
+            subscriptionUpdate: immediateSubscriptionUpdate,
+            currentPrices,
+            toUpdateCurrentPrices,
+          })
+        : undefined;
+
+      if (isDefined(nextPhase)) {
+        assertIsDefinedOrThrow(schedule);
+        const { currentPhase: refreshedCurrentPhase } =
+          await this.stripeSubscriptionScheduleService.loadSubscriptionSchedule(
+            subscription.stripeSubscriptionId,
+          );
+
+        assertIsDefinedOrThrow(refreshedCurrentPhase);
+
+        const nextPhasePrices = await this.getSubscriptionPricesFromItems(
+          nextPhase.items,
+        );
+        const toUpdateNextPrices = await this.computeTargetSubscriptionPrices({
+          subscriptionUpdate,
+          prices: nextPhasePrices,
+          targetApplicationProducts: updateApplicationProducts,
+        });
+
+        await this.runSubscriptionScheduleUpdate({
+          stripeScheduleId: schedule.id,
+          toUpdateNextPrices,
+          toUpdateCurrentPrices: undefined,
+          currentPhase: toPhaseUpdateParams(refreshedCurrentPhase),
+          nextPhase: toPhaseUpdateParams(nextPhase),
+          subscriptionCurrentPeriodEnd:
+            updatedStripeSubscription?.items.data[0].current_period_end ??
+            stripeSubscription.items.data[0].current_period_end,
+        });
+      }
+    }
+
+    if (updateApplicationProducts.length < targetApplicationProducts.length) {
+      await this.billingApplicationSyncService.enqueueApplicationsSync({
+        workspaceId,
+      });
+    }
+
+    const syncSubscriptionToDatabase = () =>
+      this.billingSubscriptionService.syncSubscriptionToDatabase({
+        workspaceId: subscription.workspaceId,
+        stripeSubscriptionId: subscription.stripeSubscriptionId,
+        renewalDate,
+      });
+
+    if (!isDefined(renewalDate)) {
+      await syncSubscriptionToDatabase();
+
+      return;
+    }
+
+    await this.cacheLockService.withLock(
+      syncSubscriptionToDatabase,
+      buildBillingSubscriptionStateLockKey(subscription.stripeCustomerId),
+      BILLING_SUBSCRIPTION_STATE_LOCK_OPTIONS,
+    );
+  }
+
+  private async createResourceCreditUpgradeInvoice({
+    subscription,
+    currentResourceCreditPriceId,
+    newResourceCreditPriceId,
+  }: {
+    subscription: BillingSubscriptionEntity;
+    currentResourceCreditPriceId: string;
+    newResourceCreditPriceId: string;
+  }): Promise<void> {
+    const prices = await this.billingPriceRepository.find({
+      where: {
+        stripePriceId: In([
+          currentResourceCreditPriceId,
+          newResourceCreditPriceId,
+        ]),
+      },
+    });
+
+    const currentPrice = prices.find(
+      (price) => price.stripePriceId === currentResourceCreditPriceId,
+    );
+    const newPrice = prices.find(
+      (price) => price.stripePriceId === newResourceCreditPriceId,
+    );
+
+    assertIsDefinedOrThrow(currentPrice);
+    assertIsDefinedOrThrow(newPrice);
+
+    const diffInCents =
+      Number(newPrice.unitAmount) - Number(currentPrice.unitAmount);
+
+    if (diffInCents <= 0) {
+      return;
+    }
+
+    const upgradeInvoiceItem = {
+      stripeCustomerId: subscription.stripeCustomerId,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      diffAmountInCents: diffInCents,
+      description: `Resource usage - Upgrade resource credit price from $${Number(currentPrice.unitAmount) / 100} to $${Number(newPrice.unitAmount) / 100}`,
+      currency: newPrice.currency,
+    };
+
+    if (isSendInvoiceSubscription(subscription)) {
+      await this.stripeInvoiceService.createPendingUpgradeInvoiceItem(
+        upgradeInvoiceItem,
+      );
+
+      return;
+    }
+
+    await this.stripeInvoiceService.createImmediateUpgradeInvoice(
+      upgradeInvoiceItem,
+    );
+  }
+
+  private async getProductKeyByPriceId(
+    stripePriceIds: string[],
+  ): Promise<Map<string, BillingProductKey>> {
+    if (stripePriceIds.length === 0) {
+      return new Map();
+    }
+
+    const prices = await this.billingPriceRepository.find({
+      where: { stripePriceId: In(stripePriceIds) },
+      relations: ['billingProduct'],
+    });
+
+    return new Map(
+      prices.flatMap((price) => {
+        const productKey = price.billingProduct?.metadata?.productKey;
+
+        return isDefined(productKey)
+          ? [[price.stripePriceId, productKey] as const]
+          : [];
+      }),
+    );
+  }
+
+  private async getSubscriptionPricesFromItems(
+    items: { price: string | { id: string }; quantity?: number }[],
+  ): Promise<SubscriptionStripePrices> {
+    const phaseItemPriceIds = items.map((item) =>
+      normalizePriceRef(item.price),
+    );
+
+    const phaseItemPrices = await this.billingPriceRepository.find({
+      where: { stripePriceId: In(phaseItemPriceIds) },
+      relations: ['billingProduct'],
+    });
+
+    const basePlanPrice = phaseItemPrices.find(
+      (price) =>
+        price.billingProduct?.metadata?.productKey ===
+        BillingProductKey.BASE_PRODUCT,
+    );
+
+    assertIsDefinedOrThrow(basePlanPrice);
+
+    const basePlanPhaseItem = findOrThrow(
+      items,
+      (item) => normalizePriceRef(item.price) === basePlanPrice.stripePriceId,
+    );
+
+    assertIsDefinedOrThrow(basePlanPhaseItem.quantity);
+
+    const resourceCreditPrice = phaseItemPrices.find(
+      (price) =>
+        price.billingProduct?.metadata?.productKey ===
+        BillingProductKey.RESOURCE_CREDIT,
+    );
+
+    assertIsDefinedOrThrow(resourceCreditPrice);
+
+    return {
+      baseProductPriceId: basePlanPrice.stripePriceId,
+      seats: basePlanPhaseItem.quantity,
+      resourceCreditPriceId: resourceCreditPrice.stripePriceId,
+      applicationItems: phaseItemPrices
+        .filter(
+          (price) =>
+            price.billingProduct?.metadata?.productKey ===
+            BillingProductKey.APPLICATION,
+        )
+        .map((price) => {
+          const { quantity } = findOrThrow(
+            items,
+            (item) => normalizePriceRef(item.price) === price.stripePriceId,
+          );
+
+          assertIsDefinedOrThrow(quantity);
+
+          return {
+            stripeProductId: price.stripeProductId,
+            stripePriceId: price.stripePriceId,
+            quantity,
+          };
+        }),
+    };
+  }
+
+  private async applyImmediateSubscriptionUpdate({
+    subscription,
+    stripeSubscriptionItems,
+    subscriptionUpdate,
+    currentPrices,
+    toUpdateCurrentPrices,
+  }: {
+    subscription: BillingSubscriptionEntity;
+    stripeSubscriptionItems: Stripe.SubscriptionItem[];
+    subscriptionUpdate: SubscriptionUpdate;
+    currentPrices: SubscriptionStripePrices;
+    toUpdateCurrentPrices: SubscriptionStripePrices;
+  }): Promise<Stripe.Subscription> {
+    if (
+      subscriptionUpdate.type === SubscriptionUpdateType.RESOURCE_CREDIT_PRICE
+    ) {
+      await this.createResourceCreditUpgradeInvoice({
+        subscription,
+        currentResourceCreditPriceId: currentPrices.resourceCreditPriceId,
+        newResourceCreditPriceId: subscriptionUpdate.newResourceCreditPriceId,
+      });
+    }
+
+    const { proration, anchor, metadata, paymentBehavior } =
+      computeSubscriptionUpdateOptions(subscriptionUpdate, {
+        isQuantityIncrease: isSubscriptionQuantityIncrease({
+          currentPrices,
+          toUpdatePrices: toUpdateCurrentPrices,
+        }),
+        isTrialing: subscription.status === SubscriptionStatus.Trialing,
+        isSendInvoice: isSendInvoiceSubscription(subscription),
+      });
+
+    return await this.stripeSubscriptionService.updateSubscription(
+      subscription.stripeSubscriptionId,
+      {
+        items: buildSubscriptionItemsUpdate({
+          billingSubscriptionItems: subscription.billingSubscriptionItems,
+          stripeSubscriptionItems,
+          currentPrices,
+          toUpdatePrices: toUpdateCurrentPrices,
+        }),
+        proration_behavior: proration,
+        billing_cycle_anchor: anchor,
+        metadata,
+        payment_behavior: paymentBehavior,
+      },
+    );
+  }
+
+  async runSubscriptionScheduleUpdate({
+    stripeScheduleId,
+    toUpdateNextPrices,
+    toUpdateCurrentPrices,
+    currentPhase,
+    nextPhase,
+    subscriptionCurrentPeriodEnd,
+  }: {
+    stripeScheduleId: string;
+    toUpdateNextPrices: SubscriptionStripePrices;
+    toUpdateCurrentPrices: SubscriptionStripePrices | undefined;
+    currentPhase: Stripe.SubscriptionScheduleUpdateParams.Phase;
+    nextPhase?: Stripe.SubscriptionScheduleUpdateParams.Phase;
+    subscriptionCurrentPeriodEnd: number;
+  }) {
+    const productKeyByPriceId = await this.getProductKeyByPriceId([
+      ...new Set(
+        [...(currentPhase.items ?? []), ...(nextPhase?.items ?? [])]
+          .map(({ price }) => price)
+          .filter(isDefined),
+      ),
+    ]);
+
+    const { toUpdateCurrentPhase, toUpdateNextPhase } =
+      buildSchedulePhasesUpdate({
+        currentPhase,
+        nextPhase,
+        productKeyByPriceId,
+        toUpdateCurrentPrices,
+        toUpdateNextPrices,
+        subscriptionCurrentPeriodEnd,
+      });
+
+    if (isSamePhaseSignature(toUpdateCurrentPhase, toUpdateNextPhase)) {
+      return await this.stripeSubscriptionScheduleService.releaseSubscriptionSchedule(
+        stripeScheduleId,
+      );
+    }
+
+    return await this.stripeSubscriptionScheduleService.updateSchedule(
+      stripeScheduleId,
+      {
+        phases: [toUpdateCurrentPhase, toUpdateNextPhase],
+      },
+    );
+  }
+
+  async shouldUpdateAtSubscriptionPeriodEnd(
+    subscription: BillingSubscriptionEntity,
+    update: SubscriptionUpdate,
+  ): Promise<boolean> {
+    if (
+      subscription.status === SubscriptionStatus.Trialing &&
+      (update.type === SubscriptionUpdateType.INTERVAL ||
+        update.type === SubscriptionUpdateType.PLAN)
+    ) {
+      return false;
+    }
+
+    switch (update.type) {
+      case SubscriptionUpdateType.PLAN: {
+        const currentPlan =
+          getBaseProductSubscriptionItemOrThrow(subscription).billingProduct
+            ?.metadata.planKey;
+
+        const isDowngrade =
+          isDefined(currentPlan) &&
+          getBillingPlanConfig({
+            plansConfig: this.twentyConfigService.get('BILLING_PLANS'),
+            planKey: currentPlan,
+          }).downgradePlanKeys.includes(update.newPlan);
+
+        return isDowngrade;
+      }
+      case SubscriptionUpdateType.RESOURCE_CREDIT_PRICE: {
+        const currentResourceCreditPriceId =
+          subscription.billingSubscriptionItems.find(
+            (item) =>
+              item.billingProduct?.metadata.productKey ===
+              BillingProductKey.RESOURCE_CREDIT,
+          )?.stripePriceId;
+
+        assertIsDefinedOrThrow(currentResourceCreditPriceId);
+        const currentResourceCreditPrice =
+          await this.billingPriceRepository.findOneOrFail({
+            where: { stripePriceId: currentResourceCreditPriceId },
+            relations: ['billingProduct'],
+          });
+        const newResourceCreditPrice =
+          await this.billingPriceRepository.findOneOrFail({
+            where: { stripePriceId: update.newResourceCreditPriceId },
+            relations: ['billingProduct'],
+          });
+
+        billingValidator.assertIsLicensedResourceCreditPrice(
+          currentResourceCreditPrice,
+        );
+        billingValidator.assertIsLicensedResourceCreditPrice(
+          newResourceCreditPrice,
+        );
+
+        const currentResourceCreditCap = Number(
+          currentResourceCreditPrice.metadata?.credit_amount,
+        );
+        const newResourceCreditCap = Number(
+          newResourceCreditPrice.metadata?.credit_amount,
+        );
+
+        const isDowngrade = currentResourceCreditCap > newResourceCreditCap;
+
+        return isDowngrade;
+      }
+      case SubscriptionUpdateType.QUANTITIES:
+      case SubscriptionUpdateType.APPLICATIONS:
+        return false;
+      case SubscriptionUpdateType.INTERVAL: {
+        const currentInterval = subscription.interval;
+        const isDowngrade =
+          currentInterval !== update.newInterval &&
+          update.newInterval === SubscriptionInterval.Month;
+
+        return isDowngrade;
+      }
+      default: {
+        return assertUnreachable(
+          update,
+          'Should never occur, add validator for new subscription update type',
+        );
+      }
+    }
+  }
+
+  private async computeTargetSeats({
+    workspaceId,
+    subscriptionUpdate,
+    currentSeats,
+  }: {
+    workspaceId: string;
+    subscriptionUpdate: SubscriptionUpdate;
+    currentSeats: number;
+  }): Promise<number> {
+    switch (subscriptionUpdate.type) {
+      case SubscriptionUpdateType.QUANTITIES:
+        return subscriptionUpdate.newSeats;
+      case SubscriptionUpdateType.APPLICATIONS:
+        return currentSeats;
+      default:
+        return (
+          (await this.billingSeatService.computeCurrentBilledSeats(
+            workspaceId,
+          )) ?? currentSeats
+        );
+    }
+  }
+
+  private async computeTargetSubscriptionPrices({
+    subscriptionUpdate,
+    prices,
+    targetApplicationProducts,
+  }: {
+    subscriptionUpdate: SubscriptionUpdate;
+    prices: SubscriptionStripePrices;
+    targetApplicationProducts: TargetApplicationProduct[];
+  }): Promise<SubscriptionStripePrices> {
+    const toUpdatePrices = await this.computeSubscriptionPricesUpdate(
+      subscriptionUpdate,
+      prices,
+    );
+
+    const { interval } = await this.billingPriceRepository.findOneOrFail({
+      where: { stripePriceId: toUpdatePrices.baseProductPriceId },
+    });
+
+    return {
+      ...toUpdatePrices,
+      applicationItems: buildApplicationItemsForInterval({
+        targetApplicationProducts,
+        interval,
+      }),
+    };
+  }
+
+  async computeSubscriptionPricesUpdate(
+    update: SubscriptionUpdate,
+    currentPrices: SubscriptionStripePrices,
+  ): Promise<SubscriptionStripePrices> {
+    switch (update.type) {
+      case SubscriptionUpdateType.PLAN:
+        return await this.computeSubscriptionPricesUpdateByPlan(
+          update.newPlan,
+          currentPrices,
+        );
+      case SubscriptionUpdateType.QUANTITIES:
+        return this.computeSubscriptionPricesUpdateBySeats(
+          update.newSeats,
+          currentPrices,
+        );
+      case SubscriptionUpdateType.INTERVAL:
+        return await this.computeSubscriptionPricesUpdateByInterval(
+          update.newInterval,
+          currentPrices,
+        );
+      case SubscriptionUpdateType.RESOURCE_CREDIT_PRICE:
+        return await this.computeSubscriptionPricesUpdateByResourceCreditPrice(
+          update.newResourceCreditPriceId,
+          currentPrices,
+        );
+      case SubscriptionUpdateType.APPLICATIONS:
+        return currentPrices;
+    }
+  }
+
+  private computeSubscriptionPricesUpdateBySeats(
+    newSeats: number,
+    currentPrices: SubscriptionStripePrices,
+  ): SubscriptionStripePrices {
+    return {
+      ...currentPrices,
+      seats: newSeats,
+    };
+  }
+
+  private async computeSubscriptionPricesUpdateByResourceCreditPrice(
+    newResourceCreditPriceId: string,
+    currentPrices: SubscriptionStripePrices,
+  ): Promise<SubscriptionStripePrices> {
+    const currentBaseProductPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: currentPrices.baseProductPriceId },
+        relations: ['billingProduct'],
+      });
+    const currentInterval = currentBaseProductPrice.interval;
+    const currentPlanKey =
+      currentBaseProductPrice.billingProduct?.metadata.planKey;
+
+    assertIsDefinedOrThrow(currentPlanKey);
+
+    const newResourceCreditPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: newResourceCreditPriceId },
+        relations: ['billingProduct'],
+      });
+
+    billingValidator.assertIsLicensedResourceCreditPrice(
+      newResourceCreditPrice,
+    );
+
+    const newInterval = newResourceCreditPrice.interval;
+    const newPlanKey = newResourceCreditPrice.billingProduct?.metadata.planKey;
+
+    if (newInterval === currentInterval && currentPlanKey === newPlanKey) {
+      return {
+        ...currentPrices,
+        resourceCreditPriceId: newResourceCreditPriceId,
+      };
+    }
+
+    const newEquivalentResourceCreditPrice =
+      await this.billingPriceService.findEquivalentResourceCreditPrice({
+        referencePrice: newResourceCreditPrice,
+        targetInterval: currentInterval,
+        targetPlanKey: currentPlanKey,
+        hasSameInterval: newInterval === currentInterval,
+        hasSamePlanKey: currentPlanKey === newPlanKey,
+      });
+
+    return {
+      ...currentPrices,
+      resourceCreditPriceId: newEquivalentResourceCreditPrice.stripePriceId,
+    };
+  }
+
+  private async computeSubscriptionPricesUpdateByPlan(
+    newPlan: BillingPlanKey,
+    currentPrices: SubscriptionStripePrices,
+  ): Promise<SubscriptionStripePrices> {
+    const currentBaseProductPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: currentPrices.baseProductPriceId },
+        relations: ['billingProduct'],
+      });
+
+    const currentInterval = currentBaseProductPrice.interval;
+    const currentPlanKey =
+      currentBaseProductPrice.billingProduct?.metadata.planKey;
+
+    assertIsDefinedOrThrow(currentPlanKey);
+
+    if (currentPlanKey === newPlan) {
+      return currentPrices;
+    }
+
+    const billingPricesPerPlanAndIntervalArray =
+      await this.billingProductService.getProductPrices({
+        interval: currentInterval,
+        planKey: newPlan,
+      });
+
+    const targetBaseProductPrice = findSellableBaseProductPriceOrThrow(
+      billingPricesPerPlanAndIntervalArray,
+    );
+
+    const currentResourceCreditPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: currentPrices.resourceCreditPriceId },
+        relations: ['billingProduct'],
+      });
+
+    billingValidator.assertIsLicensedResourceCreditPrice(
+      currentResourceCreditPrice,
+    );
+
+    const targetResourceCreditPrice =
+      await this.billingPriceService.findEquivalentResourceCreditPrice({
+        referencePrice: currentResourceCreditPrice,
+        targetInterval: currentInterval,
+        targetPlanKey: newPlan,
+        hasSameInterval: true,
+        hasSamePlanKey: false,
+      });
+
+    return {
+      ...currentPrices,
+      baseProductPriceId: targetBaseProductPrice.stripePriceId,
+      resourceCreditPriceId: targetResourceCreditPrice.stripePriceId,
+    };
+  }
+
+  private async computeSubscriptionPricesUpdateByInterval(
+    newInterval: SubscriptionInterval,
+    currentPrices: SubscriptionStripePrices,
+  ): Promise<SubscriptionStripePrices> {
+    const currentBaseProductPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: currentPrices.baseProductPriceId },
+        relations: ['billingProduct', 'billingProduct.billingPrices'],
+      });
+
+    const currentInterval = currentBaseProductPrice.interval;
+    const currentBillingProduct = currentBaseProductPrice.billingProduct;
+
+    assertIsDefinedOrThrow(currentBillingProduct);
+
+    const currentPlanKey = currentBillingProduct.metadata.planKey;
+
+    assertIsDefinedOrThrow(currentPlanKey);
+
+    if (currentInterval === newInterval) {
+      return currentPrices;
+    }
+
+    const targetBaseProductPrice = findProductPriceForIntervalOrThrow(
+      currentBillingProduct,
+      newInterval,
+    );
+
+    const currentResourceCreditPrice =
+      await this.billingPriceRepository.findOneOrFail({
+        where: { stripePriceId: currentPrices.resourceCreditPriceId },
+        relations: ['billingProduct'],
+      });
+
+    billingValidator.assertIsLicensedResourceCreditPrice(
+      currentResourceCreditPrice,
+    );
+
+    const targetResourceCreditPrice =
+      await this.billingPriceService.findEquivalentResourceCreditPrice({
+        referencePrice: currentResourceCreditPrice,
+        targetInterval: newInterval,
+        targetPlanKey: currentPlanKey,
+        hasSameInterval: false,
+        hasSamePlanKey: true,
+      });
+
+    return {
+      ...currentPrices,
+      baseProductPriceId: targetBaseProductPrice.stripePriceId,
+      resourceCreditPriceId: targetResourceCreditPrice.stripePriceId,
+    };
+  }
+}

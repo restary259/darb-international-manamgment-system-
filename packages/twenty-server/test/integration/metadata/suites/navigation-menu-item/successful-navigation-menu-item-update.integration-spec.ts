@@ -1,0 +1,188 @@
+import { faker } from '@faker-js/faker';
+import { NavigationMenuItemType } from 'twenty-shared/types';
+import { createNavigationMenuItem } from 'test/integration/metadata/suites/navigation-menu-item/utils/create-navigation-menu-item.util';
+import { deleteNavigationMenuItem } from 'test/integration/metadata/suites/navigation-menu-item/utils/delete-navigation-menu-item.util';
+import { updateNavigationMenuItem } from 'test/integration/metadata/suites/navigation-menu-item/utils/update-navigation-menu-item.util';
+import { findManyObjectMetadata } from 'test/integration/metadata/suites/object-metadata/utils/find-many-object-metadata.util';
+import { jestExpectToBeDefined } from 'test/utils/jest-expect-to-be-defined.util.test';
+
+describe('NavigationMenuItem update should succeed', () => {
+  let createdNavigationMenuItemId: string;
+  let personObjectMetadataId: string;
+  let createdFolderId: string | undefined;
+
+  beforeAll(async () => {
+    const { objects } = await findManyObjectMetadata({
+      expectToFail: false,
+      input: {
+        filter: {},
+        paging: { first: 1000 },
+      },
+      gqlFields: `
+        id
+        nameSingular
+      `,
+    });
+
+    jestExpectToBeDefined(objects);
+
+    const personObjectMetadata = objects.find(
+      (object: { nameSingular: string }) => object.nameSingular === 'person',
+    );
+
+    jestExpectToBeDefined(personObjectMetadata);
+
+    personObjectMetadataId = personObjectMetadata.id;
+  });
+
+  beforeEach(async () => {
+    const targetRecordId = faker.string.uuid();
+
+    const { data } = await createNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        type: NavigationMenuItemType.RECORD,
+        targetRecordId,
+        targetObjectMetadataId: personObjectMetadataId,
+        position: 1,
+      },
+    });
+
+    createdNavigationMenuItemId = data.createNavigationMenuItem.id;
+  });
+
+  afterEach(async () => {
+    if (createdNavigationMenuItemId) {
+      await deleteNavigationMenuItem({
+        expectToFail: false,
+        input: { id: createdNavigationMenuItemId },
+      });
+    }
+    if (createdFolderId) {
+      await deleteNavigationMenuItem({
+        expectToFail: false,
+        input: { id: createdFolderId },
+      });
+      createdFolderId = undefined;
+    }
+  });
+
+  it('should update the position', async () => {
+    const { data } = await updateNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        id: createdNavigationMenuItemId,
+        update: {
+          position: 10,
+        },
+      },
+    });
+
+    expect(data.updateNavigationMenuItem).toMatchObject({
+      id: createdNavigationMenuItemId,
+      position: 10,
+    });
+  });
+
+  it('should update the parentId', async () => {
+    const { data: folderData } = await createNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        type: NavigationMenuItemType.FOLDER,
+        name: 'Folder',
+      },
+    });
+
+    const parentId = folderData?.createNavigationMenuItem?.id;
+
+    jestExpectToBeDefined(parentId);
+    createdFolderId = parentId;
+
+    const { data } = await updateNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        id: createdNavigationMenuItemId,
+        update: {
+          parentId,
+        },
+      },
+    });
+
+    expect(data.updateNavigationMenuItem).toMatchObject({
+      id: createdNavigationMenuItemId,
+      parentId,
+    });
+  });
+
+  it('should update parentId to null', async () => {
+    const { data: folderData } = await createNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        type: NavigationMenuItemType.FOLDER,
+        name: 'Folder',
+      },
+    });
+
+    const parentId = folderData?.createNavigationMenuItem?.id;
+
+    jestExpectToBeDefined(parentId);
+    createdFolderId = parentId;
+
+    await updateNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        id: createdNavigationMenuItemId,
+        update: {
+          parentId,
+        },
+      },
+    });
+
+    const { data } = await updateNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        id: createdNavigationMenuItemId,
+        update: {
+          parentId: null,
+        },
+      },
+    });
+
+    expect(data.updateNavigationMenuItem).toMatchObject({
+      id: createdNavigationMenuItemId,
+      parentId: null,
+    });
+  });
+
+  it('should update multiple fields at once', async () => {
+    const { data: folderData } = await createNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        type: NavigationMenuItemType.FOLDER,
+        name: 'Folder',
+      },
+    });
+
+    const parentId = folderData?.createNavigationMenuItem?.id;
+
+    jestExpectToBeDefined(parentId);
+    createdFolderId = parentId;
+
+    const { data } = await updateNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        id: createdNavigationMenuItemId,
+        update: {
+          parentId,
+          position: 99,
+        },
+      },
+    });
+
+    expect(data.updateNavigationMenuItem).toMatchObject({
+      id: createdNavigationMenuItemId,
+      parentId,
+      position: 99,
+    });
+  });
+});

@@ -1,0 +1,104 @@
+import { useObjectMetadataItem } from '@/object-metadata/hooks/useObjectMetadataItem';
+import { formatFieldMetadataItemAsFieldDefinition } from '@/object-metadata/utils/formatFieldMetadataItemAsFieldDefinition';
+import { RecordFieldComponentInstanceContext } from '@/object-record/record-field/ui/states/contexts/RecordFieldComponentInstanceContext';
+import { RecordFormFieldInput } from '@/object-record/record-form/components/RecordFormFieldInput';
+import { getRecordFormFieldInputInstanceId } from '@/object-record/record-form/utils/getRecordFormFieldInputInstanceId';
+import { isFieldRelation } from '@/object-record/record-field/ui/types/guards/isFieldRelation';
+import { type UpdateMultipleRecordsState } from '@/object-record/record-update-multiple/components/UpdateMultipleRecordsContainer';
+import { getFieldsEditableInMultiEditForm } from '@/object-record/record-update-multiple/utils/getFieldsEditableInMultiEditForm';
+import { isUpdateRecordValueEmpty } from '@/object-record/record-update-multiple/utils/isUpdateRecordValueEmpty';
+import { css } from '@linaria/core';
+import { FieldMetadataType } from 'twenty-shared/types';
+import { computeRelationGqlFieldJoinColumnName } from 'twenty-shared/utils';
+import { Section } from 'twenty-ui/components/layout';
+import { themeCssVariables } from 'twenty-ui/theme';
+import { type JsonValue } from 'type-fest';
+
+const updateMultipleRecordsFormSectionClassName = css`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[6]};
+  padding: ${themeCssVariables.spacing[4]} ${themeCssVariables.spacing[3]};
+`;
+
+export type UpdateMultipleRecordsFormProps = {
+  objectNameSingular: string;
+  formInstanceId: string;
+  disabled?: boolean;
+  values: UpdateMultipleRecordsState;
+  onChange: (fieldName: string, value: unknown) => void;
+};
+
+export const UpdateMultipleRecordsForm = ({
+  objectNameSingular,
+  formInstanceId,
+  disabled = false,
+  values,
+  onChange,
+}: UpdateMultipleRecordsFormProps) => {
+  const { objectMetadataItem } = useObjectMetadataItem({
+    objectNameSingular,
+  });
+
+  const editableFields = getFieldsEditableInMultiEditForm(objectMetadataItem);
+
+  const fieldsWithDefinitions = editableFields.map((fieldMetadataItem) => ({
+    fieldMetadataItem,
+    fieldDefinition: formatFieldMetadataItemAsFieldDefinition({
+      field: fieldMetadataItem,
+      objectMetadataItem,
+      showLabel: true,
+      labelWidth: 90,
+    }),
+  }));
+
+  return (
+    <Section.Root
+      className={updateMultipleRecordsFormSectionClassName}
+      fullWidth={false}
+    >
+      {fieldsWithDefinitions.map(({ fieldMetadataItem, fieldDefinition }) => {
+        const fieldName = fieldDefinition.metadata.fieldName;
+        const isRelation = isFieldRelation(fieldDefinition);
+        const fieldNameOrRelationIdName =
+          isRelation && fieldMetadataItem.type === FieldMetadataType.RELATION
+            ? computeRelationGqlFieldJoinColumnName({
+                name: fieldMetadataItem.name,
+              })
+            : fieldName;
+
+        const value = values[fieldNameOrRelationIdName];
+
+        const handleValueChange = (newValue: JsonValue) => {
+          if (newValue === null) {
+            onChange(fieldNameOrRelationIdName, null);
+          } else if (isUpdateRecordValueEmpty(newValue)) {
+            onChange(fieldNameOrRelationIdName, undefined);
+          } else {
+            onChange(fieldNameOrRelationIdName, newValue);
+          }
+        };
+
+        return (
+          <RecordFieldComponentInstanceContext.Provider
+            key={fieldDefinition.metadata.fieldName}
+            value={{
+              instanceId: getRecordFormFieldInputInstanceId({
+                formInstanceId,
+                fieldMetadataId: fieldMetadataItem.id,
+              }),
+            }}
+          >
+            <RecordFormFieldInput
+              readonly={disabled}
+              field={fieldDefinition}
+              defaultValue={value}
+              onChange={handleValueChange}
+              onClear={() => onChange(fieldNameOrRelationIdName, undefined)}
+            />
+          </RecordFieldComponentInstanceContext.Provider>
+        );
+      })}
+    </Section.Root>
+  );
+};

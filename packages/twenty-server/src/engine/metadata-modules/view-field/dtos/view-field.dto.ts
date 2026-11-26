@@ -1,0 +1,83 @@
+import {
+  Field,
+  HideField,
+  ObjectType,
+  registerEnumType,
+} from '@nestjs/graphql';
+import { AggregateOperations } from 'twenty-shared/types';
+
+import { type AuthoredOverrides } from 'src/engine/metadata-modules/overrides/types/authored-overrides.type';
+import { UUIDScalarType } from 'src/engine/api/graphql/workspace-schema-builder/graphql-types/scalars';
+import { ViewFieldRelationScopeDTO } from 'src/engine/metadata-modules/view-field/dtos/view-field-relation-scope.dto';
+import { type ViewFieldOverrides } from 'src/engine/metadata-modules/view-field/entities/view-field.entity';
+
+registerEnumType(AggregateOperations, { name: 'AggregateOperations' });
+
+@ObjectType('ViewField')
+export class ViewFieldDTO {
+  @Field(() => UUIDScalarType)
+  id: string;
+
+  @Field(() => UUIDScalarType, { nullable: false })
+  universalIdentifier: string;
+
+  @Field(() => UUIDScalarType, { nullable: false })
+  applicationId: string;
+
+  @Field({ nullable: false })
+  isSystemSideEffect: boolean;
+
+  @Field({ nullable: false, defaultValue: true })
+  isCanonical: boolean;
+
+  @Field(() => UUIDScalarType, { nullable: false })
+  fieldMetadataId: string;
+
+  @Field({ nullable: false, defaultValue: true })
+  isVisible: boolean;
+
+  @Field({ nullable: false, defaultValue: 0 })
+  size: number;
+
+  @Field({ nullable: false, defaultValue: 0 })
+  position: number;
+
+  @Field(() => AggregateOperations, { nullable: true })
+  aggregateOperation?: AggregateOperations | null;
+
+  @Field(() => UUIDScalarType, { nullable: false })
+  viewId: string;
+
+  @Field(() => UUIDScalarType, { nullable: true })
+  viewFieldGroupId?: string | null;
+
+  @Field(() => UUIDScalarType, { nullable: true })
+  relationTargetFieldMetadataId?: string | null;
+
+  @Field(() => ViewFieldRelationScopeDTO, { nullable: true })
+  relationScope?: ViewFieldRelationScopeDTO | null;
+
+  @Field(() => String, { nullable: true })
+  label?: string | null;
+
+  @Field(() => UUIDScalarType, { nullable: false })
+  workspaceId: string;
+
+  @Field()
+  createdAt: Date;
+
+  @Field()
+  updatedAt: Date;
+
+  @Field(() => Boolean, { nullable: false })
+  isActive: boolean;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    deprecationReason: 'isOverridden is deprecated',
+  })
+  isOverridden?: boolean;
+
+  @HideField()
+  overrides?: AuthoredOverrides<ViewFieldOverrides> | null;
+}

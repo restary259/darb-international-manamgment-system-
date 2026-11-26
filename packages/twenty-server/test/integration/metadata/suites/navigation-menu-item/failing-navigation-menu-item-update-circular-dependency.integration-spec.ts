@@ -1,0 +1,49 @@
+import { NavigationMenuItemType } from 'twenty-shared/types';
+import { isDefined } from 'twenty-shared/utils';
+import { expectOneNotInternalServerErrorSnapshot } from 'test/integration/graphql/utils/expect-one-not-internal-server-error-snapshot.util';
+import { createNavigationMenuItem } from 'test/integration/metadata/suites/navigation-menu-item/utils/create-navigation-menu-item.util';
+import { deleteNavigationMenuItem } from 'test/integration/metadata/suites/navigation-menu-item/utils/delete-navigation-menu-item.util';
+import { updateNavigationMenuItem } from 'test/integration/metadata/suites/navigation-menu-item/utils/update-navigation-menu-item.util';
+import { jestExpectToBeDefined } from 'test/utils/jest-expect-to-be-defined.util.test';
+
+describe('Navigation Menu Item update should fail with circular dependency', () => {
+  let folderId: string;
+
+  beforeAll(async () => {
+    const { data: folderData } = await createNavigationMenuItem({
+      expectToFail: false,
+      input: {
+        type: NavigationMenuItemType.FOLDER,
+        name: 'Standalone Folder',
+      },
+    });
+
+    folderId = folderData?.createNavigationMenuItem?.id;
+    jestExpectToBeDefined(folderId);
+  });
+
+  afterAll(async () => {
+    if (isDefined(folderId)) {
+      await deleteNavigationMenuItem({
+        expectToFail: false,
+        input: { id: folderId },
+      });
+    }
+  });
+
+  it('when parentId equals id (self-reference)', async () => {
+    const { errors } = await updateNavigationMenuItem({
+      expectToFail: true,
+      input: {
+        id: folderId,
+        update: {
+          parentId: folderId,
+        },
+      },
+    });
+
+    expectOneNotInternalServerErrorSnapshot({
+      errors,
+    });
+  });
+});

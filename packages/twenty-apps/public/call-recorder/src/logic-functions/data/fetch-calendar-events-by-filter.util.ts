@@ -1,0 +1,125 @@
+import { isNonEmptyString, isString, isUndefined } from '@sniptt/guards';
+import { type CoreApiClient } from 'twenty-client-sdk/core';
+import { isDefined } from 'twenty-sdk/utils';
+
+import { TWENTY_PAGE_SIZE } from 'src/logic-functions/constants/twenty-page-size';
+import { type CalendarEventRecord } from 'src/logic-functions/types/calendar-event-record.type';
+import {
+  fetchAllNodes,
+  type ConnectionPage,
+} from 'src/logic-functions/data/fetch-all-nodes.util';
+import { resolveConferenceLinkUrl } from 'src/logic-functions/domain/resolve-conference-link-url.util';
+import { stripRestrictedFieldValue } from 'src/logic-functions/data/strip-restricted-field-value.util';
+import { normalizeOptionalString } from 'src/logic-functions/utils/normalize-optional-string.util';
+
+type CalendarEventNode = {
+  id: string;
+  title?: string | null;
+  isCanceled?: boolean | null;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  iCalUid?: string | null;
+  conferenceLink?: { primaryLinkUrl?: string | null } | null;
+  location?: string | null;
+  description?: string | null;
+  callRecorderPreference?: string | null;
+  calendarChannelEventAssociations?: {
+    edges?: { node?: { calendarChannelId?: string | null } | null }[] | null;
+  } | null;
+  calendarEventParticipants?: {
+    totalCount?: number | null;
+    edges?:
+      | {
+          node?: {
+            handle?: string | null;
+            workspaceMemberId?: string | null;
+          } | null;
+        }[]
+      | null;
+  } | null;
+};
+
+export const fetchCalendarEventsByFilter = async (
+  client: Pick<CoreApiClient, 'query'>,
+  filter: Record<string, unknown>,
+): Promise<CalendarEventRecord[]> => {
+  const calendarEventNodes = await fetchAllNodes<CalendarEventNode>(
+    async (afterCursor) => {
+      const queryResult = await client.query({
+        calendarEvents: {
+          __args: {
+            filter,
+            first: TWENTY_PAGE_SIZE,
+            ...(isUndefined(afterCursor) ? {} : { after: afterCursor }),
+          },
+          pageInfo: {
+            hasNextPage: true,
+            endCursor: true,
+          },
+          edges: {
+            node: {
+              id: true,
+              title: true,
+              isCanceled: true,
+              startsAt: true,
+              endsAt: true,
+              iCalUid: true,
+              conferenceLink: {
+                primaryLinkUrl: true,
+              },
+              location: true,
+              description: true,
+              callRecorderPreference: true,
+              calendarChannelEventAssociations: {
+                edges: { node: { calendarChannelId: true } },
+              },
+              calendarEventParticipants: {
+                // A nested relation returns at most 60 records and never reports a next page.
+                totalCount: true,
+                edges: { node: { handle: true, workspaceMemberId: true } },
+              },
+            },
+          },
+        },
+      });
+
+      return queryResult.calendarEvents as
+        | ConnectionPage<CalendarEventNode>
+        | undefined;
+    },
+  );
+
+  return calendarEventNodes.map((calendarEvent) => ({
+    id: calendarEvent.id,
+    title: stripRestrictedFieldValue(calendarEvent.title ?? undefined),
+    isCanceled: calendarEvent.isCanceled ?? false,
+    startsAt: calendarEvent.startsAt ?? undefined,
+    endsAt: calendarEvent.endsAt ?? undefined,
+    iCalUid: calendarEvent.iCalUid ?? undefined,
+    conferenceLinkUrl: resolveConferenceLinkUrl({
+      conferenceLinkUrl: calendarEvent.conferenceLink?.primaryLinkUrl,
+      location: stripRestrictedFieldValue(calendarEvent.location ?? undefined),
+      description: stripRestrictedFieldValue(
+        calendarEvent.description ?? undefined,
+      ),
+    }),
+    callRecorderPreference: isString(calendarEvent.callRecorderPreference)
+      ? calendarEvent.callRecorderPreference
+      : undefined,
+    calendarChannelIds: (
+      calendarEvent.calendarChannelEventAssociations?.edges ?? []
+    )
+      .map((edge) => edge.node?.calendarChannelId)
+      .filter(isString),
+    participants: (calendarEvent.calendarEventParticipants?.edges ?? [])
+      .map((edge) => edge.node)
+      .filter(isDefined)
+      .map((participant) => ({
+        handle: normalizeOptionalString(participant.handle),
+        isWorkspaceMember: isNonEmptyString(participant.workspaceMemberId),
+      })),
+    hasUnlistedParticipants:
+      (calendarEvent.calendarEventParticipants?.totalCount ?? 0) >
+      (calendarEvent.calendarEventParticipants?.edges ?? []).length,
+  }));
+};

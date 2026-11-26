@@ -1,0 +1,61 @@
+import { isNonEmptyArray } from 'twenty-shared/utils';
+
+import { type ObjectRecordFilter } from 'src/engine/api/graphql/workspace-query-builder/interfaces/object-record.interface';
+
+import { type CommonQueryParser } from 'src/engine/api/common/common-query-parsers/common-query.parser';
+import { type WorkspaceSelectQueryBuilder } from 'src/engine/twenty-orm/query-builder/workspace-select-query-builder';
+import { type WorkspaceRepository } from 'src/engine/twenty-orm/repository/workspace-repository';
+import { type MutationKind } from 'src/engine/twenty-orm/sql/utils/build-mutation-statement.util';
+
+type BuildMutationQueryBuilderArgs = {
+  repository: WorkspaceRepository;
+  alias: string;
+  filter: Partial<ObjectRecordFilter>;
+  commonQueryParser: CommonQueryParser;
+  kind: MutationKind;
+};
+
+export const buildMutationQueryBuilder = async ({
+  repository,
+  alias,
+  filter,
+  commonQueryParser,
+  kind,
+}: BuildMutationQueryBuilderArgs): Promise<{
+  selectQueryBuilder: WorkspaceSelectQueryBuilder;
+  rowLevelPermissionsApplied: boolean;
+}> => {
+  const filteredQueryBuilder = repository.createQueryBuilder(alias);
+
+  commonQueryParser.applyFilterToBuilder({
+    queryBuilder: filteredQueryBuilder,
+    objectNameSingular: alias,
+    recordFilter: filter,
+  });
+
+  const hasRelationTraversal = filteredQueryBuilder.getJoinAliases().length > 0;
+  // A write statement reads the stored table, where computed columns hold no value for its filter
+  const hasComputedColumns = isNonEmptyArray(
+    filteredQueryBuilder.tableShape.computedColumnShapes,
+  );
+
+  if (!hasRelationTraversal && !hasComputedColumns) {
+    return {
+      selectQueryBuilder: filteredQueryBuilder,
+      rowLevelPermissionsApplied: false,
+    };
+  }
+
+  const idSubQueryBuilder = filteredQueryBuilder
+    .select(`${alias}.id`)
+    .withDeleted();
+
+  await repository.applyWriteRowLevelPermissions(idSubQueryBuilder, kind);
+
+  const selectQueryBuilder = repository
+    .createQueryBuilder(alias)
+    .where(`"${alias}"."id" IN (${idSubQueryBuilder.getQuery()})`)
+    .setParameters(idSubQueryBuilder.getParameters());
+
+  return { selectQueryBuilder, rowLevelPermissionsApplied: true };
+};

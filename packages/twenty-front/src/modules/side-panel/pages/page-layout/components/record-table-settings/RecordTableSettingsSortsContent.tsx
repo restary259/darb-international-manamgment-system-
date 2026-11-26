@@ -1,0 +1,148 @@
+import { type FieldMetadataItem } from '@/object-metadata/types/FieldMetadataItem';
+import { filterSortableFieldMetadataItems } from '@/object-metadata/utils/filterSortableFieldMetadataItems';
+import { type RecordSort } from '@/object-record/record-sort/types/RecordSort';
+import { currentRecordSortsComponentState } from '@/object-record/record-sort/states/currentRecordSortsComponentState';
+import { useAtomComponentState } from '@/ui/utilities/state/jotai/hooks/useAtomComponentState';
+import { styled } from '@linaria/react';
+import { isDefined } from 'twenty-shared/utils';
+import { IconArrowsSort, IconTrash } from 'twenty-ui/icon';
+import { useIcons } from 'twenty-ui/icon/provider';
+import { Button, type SelectOption } from 'twenty-ui/primitives/input';
+import { Select } from '@/ui/input/components/Select';
+import { themeCssVariables } from 'twenty-ui/theme';
+import { v4 as uuidv4 } from 'uuid';
+import { ViewSortDirection } from '~/generated-metadata/graphql';
+import { useLingui } from '@lingui/react/macro';
+
+const StyledContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledSortItemContainer = styled.div`
+  align-items: center;
+  display: flex;
+  gap: ${themeCssVariables.spacing[2]};
+`;
+
+const StyledAddButtonContainer = styled.div`
+  &:not(:first-child) {
+    margin-top: ${themeCssVariables.spacing[1]};
+  }
+`;
+
+type RecordTableSettingsSortsContentProps = {
+  fieldMetadataItems: FieldMetadataItem[];
+  onUpdate?: () => void;
+};
+
+export const RecordTableSettingsSortsContent = ({
+  fieldMetadataItems,
+  onUpdate,
+}: RecordTableSettingsSortsContentProps) => {
+  const { t } = useLingui();
+  const { getIcon } = useIcons();
+
+  const sortableFieldOptions: Array<SelectOption<string>> = fieldMetadataItems
+    .filter(filterSortableFieldMetadataItems)
+    .map((field) => ({
+      Icon: getIcon(field.icon),
+      label: field.label,
+      value: field.id,
+    }));
+
+  const directionOptions: Array<SelectOption<ViewSortDirection>> = [
+    { label: t`Ascending`, value: ViewSortDirection.ASC },
+    { label: t`Descending`, value: ViewSortDirection.DESC },
+  ];
+
+  const [currentRecordSorts, setCurrentRecordSorts] = useAtomComponentState(
+    currentRecordSortsComponentState,
+  );
+
+  const handleAddSort = () => {
+    const firstAvailableField = sortableFieldOptions[0]?.value;
+
+    if (!isDefined(firstAvailableField)) {
+      return;
+    }
+
+    const newSort: RecordSort = {
+      id: uuidv4(),
+      fieldMetadataId: firstAvailableField,
+      direction: ViewSortDirection.ASC,
+    };
+
+    setCurrentRecordSorts([...currentRecordSorts, newSort]);
+    onUpdate?.();
+  };
+
+  const handleRemoveSort = (sortId: string) => {
+    setCurrentRecordSorts(
+      currentRecordSorts.filter((sort) => sort.id !== sortId),
+    );
+    onUpdate?.();
+  };
+
+  const handleFieldChange = (sortId: string, fieldMetadataId: string) => {
+    setCurrentRecordSorts(
+      currentRecordSorts.map((sort) =>
+        sort.id === sortId ? { ...sort, fieldMetadataId } : sort,
+      ),
+    );
+    onUpdate?.();
+  };
+
+  const handleDirectionChange = (
+    sortId: string,
+    direction: ViewSortDirection,
+  ) => {
+    setCurrentRecordSorts(
+      currentRecordSorts.map((sort) =>
+        sort.id === sortId ? { ...sort, direction } : sort,
+      ),
+    );
+    onUpdate?.();
+  };
+
+  return (
+    <StyledContainer>
+      {currentRecordSorts.map((sort) => (
+        <StyledSortItemContainer key={sort.id}>
+          <Select
+            dropdownId={`record-table-widget-sort-field-${sort.id}`}
+            fullWidth
+            value={sort.fieldMetadataId}
+            options={sortableFieldOptions}
+            onChange={(value) => handleFieldChange(sort.id, value)}
+            withSearchInput
+          />
+          <Select
+            dropdownId={`record-table-widget-sort-direction-${sort.id}`}
+            fullWidth
+            value={sort.direction}
+            options={directionOptions}
+            onChange={(value) =>
+              handleDirectionChange(sort.id, value as ViewSortDirection)
+            }
+          />
+          <Button
+            onClick={() => handleRemoveSort(sort.id)}
+            startIcon={<IconTrash />}
+            aria-label={t`Delete`}
+          />
+        </StyledSortItemContainer>
+      ))}
+      <StyledAddButtonContainer>
+        <Button
+          startIcon={<IconArrowsSort />}
+          size="sm"
+          onClick={handleAddSort}
+          aria-label={t`Add sort`}
+          variant="outline"
+        >{t`Add sort`}</Button>
+      </StyledAddButtonContainer>
+    </StyledContainer>
+  );
+};

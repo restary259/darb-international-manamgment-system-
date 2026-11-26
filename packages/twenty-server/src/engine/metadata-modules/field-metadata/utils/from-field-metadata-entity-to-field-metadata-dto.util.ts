@@ -1,0 +1,59 @@
+import { type DerivedFieldMetadataIds } from 'src/engine/metadata-modules/derived-field-metadata-ids/types/derived-field-metadata-ids.type';
+import { type FieldMetadataDTO } from 'src/engine/metadata-modules/field-metadata/dtos/field-metadata.dto';
+import { type FieldMetadataEntity } from 'src/engine/metadata-modules/field-metadata/field-metadata.entity';
+import { readAuthoredOverrideProperty } from 'src/engine/metadata-modules/overrides/utils/read-authored-override-property.util';
+import { isFieldMetadataUIEditable } from 'src/engine/metadata-modules/flat-field-metadata/utils/is-field-metadata-ui-editable.util';
+
+const resolveEffectiveEntityIsActive = (entity: {
+  isActive: boolean;
+  overrides: unknown;
+}): boolean => {
+  const overrideValue = readAuthoredOverrideProperty({
+    metadataName: 'fieldMetadata',
+    overrides: entity.overrides,
+    path: ['isActive'],
+    authorContext: { ownerApplicationUniversalIdentifier: undefined },
+  });
+
+  return typeof overrideValue === 'boolean' ? overrideValue : entity.isActive;
+};
+
+// isUnique lives in IndexMetadata and options in their rows, so callers pass what was derived from them
+export const fromFieldMetadataEntityToFieldMetadataDto = (
+  entity: FieldMetadataEntity,
+  derivedFieldMetadataIds?: DerivedFieldMetadataIds,
+): FieldMetadataDTO => ({
+  id: entity.id,
+  universalIdentifier: entity.universalIdentifier,
+  applicationId: entity.applicationId,
+  type: entity.type,
+  name: entity.name,
+  label: entity.label,
+  description: entity.description ?? undefined,
+  icon: entity.icon ?? undefined,
+  overrides: entity.overrides ?? undefined,
+  isActive: resolveEffectiveEntityIsActive(entity),
+  isSystem: entity.isSystem,
+  isUIEditable: isFieldMetadataUIEditable(entity),
+  isUIReadOnly: !isFieldMetadataUIEditable(entity),
+  isSystemSideEffect: entity.isSystemSideEffect,
+  disabledFieldPermissionActions: entity.disabledFieldPermissionActions,
+  isNullable: entity.isNullable ?? false,
+  isUnique:
+    derivedFieldMetadataIds?.uniqueFieldMetadataIds.has(entity.id) ?? false,
+  isSearchable:
+    derivedFieldMetadataIds?.searchableFieldMetadataIds.has(entity.id) ?? false,
+  isAuditLogged: entity.isAuditLogged,
+  defaultValue: entity.defaultValue ?? undefined,
+  options:
+    derivedFieldMetadataIds?.optionsByFieldMetadataId.get(entity.id) ??
+    entity.options ??
+    undefined,
+  settings: entity.settings ?? undefined,
+  workspaceId: entity.workspaceId,
+  objectMetadataId: entity.objectMetadataId,
+  isLabelSyncedWithName: entity.isLabelSyncedWithName,
+  morphId: entity.morphId ?? undefined,
+  createdAt: entity.createdAt,
+  updatedAt: entity.updatedAt,
+});

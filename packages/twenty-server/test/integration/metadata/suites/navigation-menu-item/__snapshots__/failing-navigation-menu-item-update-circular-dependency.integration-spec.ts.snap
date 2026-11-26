@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Navigation Menu Item update should fail with circular dependency when parentId equals id (self-reference) 1`] = `
+{
+  "extensions": {
+    "code": "METADATA_VALIDATION_FAILED",
+    "errors": {
+      "navigationMenuItem": [
+        {
+          "errors": [
+            {
+              "code": "CIRCULAR_DEPENDENCY",
+              "message": "Navigation menu item cannot be its own parent",
+              "userFriendlyMessage": "Navigation menu item cannot be its own parent",
+            },
+            {
+              "code": "INVALID_NAVIGATION_MENU_ITEM_INPUT",
+              "message": "A FOLDER navigation menu item cannot be placed inside a FOLDER",
+              "userFriendlyMessage": "A FOLDER navigation menu item cannot be placed inside a FOLDER",
+            },
+          ],
+          "flatEntityMinimalInformation": {
+            "name": "Standalone Folder",
+            "type": "FOLDER",
+            "universalIdentifier": Any<String>,
+          },
+          "metadataName": "navigationMenuItem",
+          "status": "fail",
+          "type": "update",
+        },
+      ],
+    },
+    "message": "Validation failed for 1 navigationMenuItem",
+    "summary": {
+      "navigationMenuItem": 1,
+      "totalErrors": 1,
+    },
+    "userFriendlyMessage": "Navigation menu item cannot be its own parent",
+  },
+  "message": "Multiple validation errors occurred while updating navigation menu items",
+  "name": "GraphQLError",
+}
+`;
