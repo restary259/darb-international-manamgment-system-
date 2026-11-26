@@ -327,3 +327,13 @@ LABEL org.opencontainers.image.source=https://github.com/twentyhq/twenty
 LABEL org.opencontainers.image.description="All-in-one Twenty image for local development and SDK usage. Includes PostgreSQL, Redis, ClickHouse, server, and worker."
 
 ENTRYPOINT ["/init"]
+
+# ===========================================================================
+# Target: production (default)
+# Hosts that build the Dockerfile without an explicit `--target` (Railway,
+# Render, Fly) get the last stage in this file. Keep this stage last so the
+# default build is the production server + frontend image, not twenty-app-dev.
+#   docker build -f packages/twenty-docker/twenty/Dockerfile .
+# ===========================================================================
+
+FROM twenty AS production
