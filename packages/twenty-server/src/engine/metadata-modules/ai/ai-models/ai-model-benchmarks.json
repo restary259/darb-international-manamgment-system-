@@ -1,7 +1,28 @@
 {
   "source": "artificialanalysis.ai",
-  "measuredAt": "2026-11-17",
+  "measuredAt": "2026-11-27",
   "models": {
+    "gpt-5.3-codex": {
+      "outputTokensPerSecond": 113.37,
+      "effort": "xhigh",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gpt-5.3-codex",
+        "gpt-5-3-codex",
+        "59b5b14b-5365-4ee7-824a-18a8e6309644",
+        "GPT-5.3 Codex (Xhigh)"
+      ]
+    },
+    "gpt-5-mini": {
+      "outputTokensPerSecond": 99.97,
+      "effort": "high",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gpt-5-mini",
+        "29855680-7469-43eb-8b88-cd3fb1d99da3",
+        "GPT-5 mini (High)"
+      ]
+    },
     "gpt-6.1-sol": {
       "intelligenceIndex": 54.6,
       "outputTokensPerSecond": 67.93,
@@ -15,38 +36,104 @@
         "GPT-6.1 Sol (Max)"
       ]
     },
-    "gpt-4.1-mini": {
-      "outputTokensPerSecond": 149.89,
+    "gpt-5.1": {
+      "outputTokensPerSecond": 101.85,
+      "effort": "high",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-4.1-mini",
-        "gpt-4-1-mini",
-        "9f7c7566-a704-49a2-a383-cb3181da33a4",
-        "GPT-4.1 mini"
+        "gpt-5.1",
+        "gpt-5-1",
+        "4dc12a38-b18f-4c43-8e1b-678f8434b5b1",
+        "GPT-5.1 (High)"
       ]
     },
-    "o3": {
-      "outputTokensPerSecond": 156.02,
-      "measuredAt": "2026-11-17",
-      "aliases": ["o3", "16c5b637-8bce-4252-81f2-1b87a36a4e4c"]
-    },
-    "gpt-4o-2024-08-06": {
-      "outputTokensPerSecond": 166.37,
+    "gpt-5.2": {
+      "outputTokensPerSecond": 74.04,
+      "effort": "xhigh",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-4o-2024-08-06",
-        "8c1be908-67b6-4cf4-ba08-83ddbe44fde3",
-        "GPT-4o (Aug '24)"
+        "gpt-5.2",
+        "gpt-5-2",
+        "498862c3-f9ac-49d2-852f-16a02bb0c38f",
+        "GPT-5.2 (Xhigh)"
       ]
     },
-    "gpt-4o-2024-05-13": {
-      "outputTokensPerSecond": 175.1,
+    "gpt-5.6-luna": {
+      "intelligenceIndex": 23.8,
+      "outputTokensPerSecond": 127.02,
+      "costPerTask": 0.3313,
+      "effort": "max",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-4o-2024-05-13",
-        "e98e911e-9fb2-4a9a-826e-3d681d0cdca8",
-        "GPT-4o (May '24)"
-      ]
+        "gpt-5.6-luna",
+        "gpt-5-6-luna",
+        "426d24c8-49ae-482a-b4a8-20f1c53f21c1",
+        "GPT-5.6 Luna (Max)"
+      ],
+      "benchmarkByEffort": {
+        "none": {
+          "outputTokensPerSecond": 119.03,
+          "effort": "none",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-6-luna-non-reasoning",
+            "dc64f856-3ded-497d-9527-d41d31267ed5",
+            "GPT-5.6 Luna (Non-reasoning)"
+          ]
+        },
+        "low": {
+          "outputTokensPerSecond": 122.27,
+          "effort": "low",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-6-luna-low",
+            "050c61cd-cddc-463a-a30a-a82aaa37be59",
+            "GPT-5.6 Luna (Low)"
+          ]
+        },
+        "medium": {
+          "outputTokensPerSecond": 119.29,
+          "effort": "medium",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-6-luna-medium",
+            "58b812bf-8498-46db-b834-f43ccc614b61",
+            "GPT-5.6 Luna (Medium)"
+          ]
+        },
+        "high": {
+          "outputTokensPerSecond": 122.22,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-6-luna-high",
+            "aa55297e-8fbf-4372-b4ab-9b068dc6396c",
+            "GPT-5.6 Luna (High)"
+          ]
+        },
+        "xhigh": {
+          "outputTokensPerSecond": 123.53,
+          "effort": "xhigh",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-6-luna-xhigh",
+            "87110ff0-1f79-41b4-9976-eda250597317",
+            "GPT-5.6 Luna (Xhigh)"
+          ]
+        },
+        "max": {
+          "intelligenceIndex": 23.8,
+          "outputTokensPerSecond": 127.02,
+          "costPerTask": 0.3313,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-6-luna",
+            "426d24c8-49ae-482a-b4a8-20f1c53f21c1",
+            "GPT-5.6 Luna (Max)"
+          ]
+        }
+      }
     },
     "gpt-4o": {
       "outputTokensPerSecond": 166.37,
@@ -58,68 +145,15 @@
         "GPT-4o (Aug '24)"
       ]
     },
-    "gpt-5.5": {
-      "outputTokensPerSecond": 77.51,
-      "effort": "xhigh",
+    "gpt-5": {
+      "outputTokensPerSecond": 95.84,
+      "effort": "high",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-5.5",
-        "gpt-5-5",
-        "1f054429-397e-4fdb-9e71-67bc92c1735e",
-        "GPT-5.5 (Xhigh)"
-      ],
-      "benchmarkByEffort": {
-        "none": {
-          "outputTokensPerSecond": 68.42,
-          "effort": "none",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-5-non-reasoning",
-            "6f1a7562-6e96-46ac-af4f-6ba5a7a3da96",
-            "GPT-5.5 (Non-reasoning)"
-          ]
-        },
-        "low": {
-          "outputTokensPerSecond": 73.48,
-          "effort": "low",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-5-low",
-            "c77cfe51-f4a0-4692-9dee-5061ef667f23",
-            "GPT-5.5 (Low)"
-          ]
-        },
-        "medium": {
-          "outputTokensPerSecond": 71.41,
-          "effort": "medium",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-5-medium",
-            "6b79f899-e3c0-45f6-923c-243faccdb2fc",
-            "GPT-5.5 (Medium)"
-          ]
-        },
-        "high": {
-          "outputTokensPerSecond": 80.97,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-5-high",
-            "b13c1257-d746-4027-8fc8-4892dc14701c",
-            "GPT-5.5 (High)"
-          ]
-        },
-        "xhigh": {
-          "outputTokensPerSecond": 77.51,
-          "effort": "xhigh",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-5",
-            "1f054429-397e-4fdb-9e71-67bc92c1735e",
-            "GPT-5.5 (Xhigh)"
-          ]
-        }
-      }
+        "gpt-5",
+        "48e50f00-1fd1-4acc-b337-61078aa341e6",
+        "GPT-5 (High)"
+      ]
     },
     "gpt-6-astra": {
       "intelligenceIndex": 56.9,
@@ -268,23 +302,86 @@
         }
       }
     },
-    "gpt-4-turbo": {
-      "outputTokensPerSecond": 128.98,
+    "gpt-6-sol": {
+      "intelligenceIndex": 44.2,
+      "outputTokensPerSecond": 150.97,
+      "costPerTask": 2.4658,
+      "effort": "max",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-4-turbo",
-        "76aa6af5-fdc6-4739-a300-983f14e74a67",
-        "GPT-4 Turbo"
-      ]
+        "gpt-6-sol",
+        "c50ea08c-88c0-4eb7-85b8-27f2bbf6d527",
+        "GPT-6 Sol (Max)"
+      ],
+      "benchmarkByEffort": {
+        "none": {
+          "outputTokensPerSecond": 133.57,
+          "effort": "none",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-6-sol-non-reasoning",
+            "d3e20e76-9e1a-45b6-b809-ad6aa37430cf",
+            "GPT-6 Sol (Non-reasoning)"
+          ]
+        },
+        "low": {
+          "outputTokensPerSecond": 136.8,
+          "effort": "low",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-6-sol-low",
+            "01459872-433a-4ab2-8e99-7083162172eb",
+            "GPT-6 Sol (Low)"
+          ]
+        },
+        "high": {
+          "outputTokensPerSecond": 143.65,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-6-sol-high",
+            "52eebe3e-6ede-4e46-92db-c5dea49fc410",
+            "GPT-6 Sol (High)"
+          ]
+        },
+        "xhigh": {
+          "outputTokensPerSecond": 140.42,
+          "effort": "xhigh",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-6-sol-xhigh",
+            "da2642fe-9f73-4788-b5af-24edcd55b37e",
+            "GPT-6 Sol (Xhigh)"
+          ]
+        },
+        "max": {
+          "intelligenceIndex": 44.2,
+          "outputTokensPerSecond": 150.97,
+          "costPerTask": 2.4658,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-6-sol",
+            "c50ea08c-88c0-4eb7-85b8-27f2bbf6d527",
+            "GPT-6 Sol (Max)"
+          ]
+        }
+      }
     },
-    "gpt-4.1": {
-      "outputTokensPerSecond": 184.22,
+    "o3": {
+      "outputTokensPerSecond": 156.02,
+      "measuredAt": "2026-11-17",
+      "aliases": ["o3", "16c5b637-8bce-4252-81f2-1b87a36a4e4c"]
+    },
+    "gpt-5-nano": {
+      "outputTokensPerSecond": 159.22,
+      "effort": "minimal",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-4.1",
-        "gpt-4-1",
-        "3b608b70-6434-4baa-99ad-45d499703c67",
-        "GPT-4.1"
+        "gpt-5-nano",
+        "gpt-5-nano-minimal",
+        "05e45a36-b5c6-47a1-8adb-9ddc19add5b3",
+        "GPT-5 nano (Minimal)"
       ]
     },
     "gpt-6.1-terra": {
@@ -300,65 +397,57 @@
         "GPT-6.1 Terra (Max)"
       ]
     },
-    "gpt-5": {
-      "outputTokensPerSecond": 95.84,
-      "effort": "high",
+    "gpt-5.4": {
+      "outputTokensPerSecond": 60.37,
+      "effort": "none",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-5",
-        "48e50f00-1fd1-4acc-b337-61078aa341e6",
-        "GPT-5 (High)"
-      ]
+        "gpt-5.4",
+        "gpt-5-4-non-reasoning",
+        "493f6a1e-7717-4e98-9d6f-548b92c4702d",
+        "GPT-5.4 (Non-reasoning)"
+      ],
+      "benchmarkByEffort": {
+        "none": {
+          "outputTokensPerSecond": 60.37,
+          "effort": "none",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-4-non-reasoning",
+            "493f6a1e-7717-4e98-9d6f-548b92c4702d",
+            "GPT-5.4 (Non-reasoning)"
+          ]
+        },
+        "low": {
+          "outputTokensPerSecond": 60.38,
+          "effort": "low",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-4-low",
+            "538e945c-6c27-4fd3-995d-ded80a36cd10",
+            "GPT-5.4 (Low)"
+          ]
+        },
+        "xhigh": {
+          "outputTokensPerSecond": 95.33,
+          "effort": "xhigh",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-4",
+            "a89c4b28-2d8c-456e-88ea-255fb51fd2b6",
+            "GPT-5.4 (Xhigh)"
+          ]
+        }
+      }
     },
-    "o4-mini": {
-      "outputTokensPerSecond": 103.47,
-      "effort": "high",
+    "gpt-4.1": {
+      "outputTokensPerSecond": 184.22,
       "measuredAt": "2026-11-17",
       "aliases": [
-        "o4-mini",
-        "84b49308-6b93-47aa-a4f6-776ee1a1e8cd",
-        "o4-mini (High)"
-      ]
-    },
-    "gpt-4.1-nano": {
-      "outputTokensPerSecond": 303.05,
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-4.1-nano",
-        "gpt-4-1-nano",
-        "72c358fd-7d45-4d68-89aa-699743710924",
-        "GPT-4.1 nano"
-      ]
-    },
-    "gpt-5.3-codex": {
-      "outputTokensPerSecond": 113.37,
-      "effort": "xhigh",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-5.3-codex",
-        "gpt-5-3-codex",
-        "59b5b14b-5365-4ee7-824a-18a8e6309644",
-        "GPT-5.3 Codex (Xhigh)"
-      ]
-    },
-    "gpt-4o-mini": {
-      "outputTokensPerSecond": 70.03,
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-4o-mini",
-        "b5c1c91a-7474-4409-9a9c-9c2ac45d9eb6",
-        "GPT-4o mini"
-      ]
-    },
-    "o3-mini": {
-      "outputTokensPerSecond": 224.49,
-      "effort": "high",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "o3-mini",
-        "o3-mini-high",
-        "076f2674-bc4b-4925-be59-50832eb8c090",
-        "o3-mini (High)"
+        "gpt-4.1",
+        "gpt-4-1",
+        "3b608b70-6434-4baa-99ad-45d499703c67",
+        "GPT-4.1"
       ]
     },
     "gpt-5.4-nano": {
@@ -372,25 +461,53 @@
         "GPT-5.4 nano (Medium)"
       ]
     },
-    "gpt-5-mini": {
-      "outputTokensPerSecond": 99.97,
-      "effort": "high",
+    "gpt-4.1-mini": {
+      "outputTokensPerSecond": 149.89,
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-5-mini",
-        "29855680-7469-43eb-8b88-cd3fb1d99da3",
-        "GPT-5 mini (High)"
+        "gpt-4.1-mini",
+        "gpt-4-1-mini",
+        "9f7c7566-a704-49a2-a383-cb3181da33a4",
+        "GPT-4.1 mini"
       ]
     },
-    "gpt-5-nano": {
-      "outputTokensPerSecond": 159.22,
-      "effort": "minimal",
+    "gpt-daybreak-blue-latest": {
+      "outputTokensPerSecond": 112.04,
+      "effort": "low",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-5-nano",
-        "gpt-5-nano-minimal",
-        "05e45a36-b5c6-47a1-8adb-9ddc19add5b3",
-        "GPT-5 nano (Minimal)"
+        "gpt-daybreak-blue-latest",
+        "gpt-5-6-sol-low",
+        "0904b596-8932-43bd-9b21-324f128e1723",
+        "GPT-5.6 Sol (Low)"
+      ]
+    },
+    "gpt-4o-2024-11-20": {
+      "outputTokensPerSecond": 166.37,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gpt-4o-2024-11-20",
+        "gpt-4o-2024-08-06",
+        "8c1be908-67b6-4cf4-ba08-83ddbe44fde3",
+        "GPT-4o (Aug '24)"
+      ]
+    },
+    "gpt-4o-mini": {
+      "outputTokensPerSecond": 70.03,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gpt-4o-mini",
+        "b5c1c91a-7474-4409-9a9c-9c2ac45d9eb6",
+        "GPT-4o mini"
+      ]
+    },
+    "gpt-4o-2024-08-06": {
+      "outputTokensPerSecond": 166.37,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gpt-4o-2024-08-06",
+        "8c1be908-67b6-4cf4-ba08-83ddbe44fde3",
+        "GPT-4o (Aug '24)"
       ]
     },
     "gpt-5.6-terra": {
@@ -470,45 +587,65 @@
         }
       }
     },
-    "gpt-5.4": {
-      "outputTokensPerSecond": 60.37,
-      "effort": "none",
+    "gpt-5.5": {
+      "outputTokensPerSecond": 77.51,
+      "effort": "xhigh",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-5.4",
-        "gpt-5-4-non-reasoning",
-        "493f6a1e-7717-4e98-9d6f-548b92c4702d",
-        "GPT-5.4 (Non-reasoning)"
+        "gpt-5.5",
+        "gpt-5-5",
+        "1f054429-397e-4fdb-9e71-67bc92c1735e",
+        "GPT-5.5 (Xhigh)"
       ],
       "benchmarkByEffort": {
         "none": {
-          "outputTokensPerSecond": 60.37,
+          "outputTokensPerSecond": 68.42,
           "effort": "none",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "gpt-5-4-non-reasoning",
-            "493f6a1e-7717-4e98-9d6f-548b92c4702d",
-            "GPT-5.4 (Non-reasoning)"
+            "gpt-5-5-non-reasoning",
+            "6f1a7562-6e96-46ac-af4f-6ba5a7a3da96",
+            "GPT-5.5 (Non-reasoning)"
           ]
         },
         "low": {
-          "outputTokensPerSecond": 60.38,
+          "outputTokensPerSecond": 73.48,
           "effort": "low",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "gpt-5-4-low",
-            "538e945c-6c27-4fd3-995d-ded80a36cd10",
-            "GPT-5.4 (Low)"
+            "gpt-5-5-low",
+            "c77cfe51-f4a0-4692-9dee-5061ef667f23",
+            "GPT-5.5 (Low)"
+          ]
+        },
+        "medium": {
+          "outputTokensPerSecond": 71.41,
+          "effort": "medium",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-5-medium",
+            "6b79f899-e3c0-45f6-923c-243faccdb2fc",
+            "GPT-5.5 (Medium)"
+          ]
+        },
+        "high": {
+          "outputTokensPerSecond": 80.97,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gpt-5-5-high",
+            "b13c1257-d746-4027-8fc8-4892dc14701c",
+            "GPT-5.5 (High)"
           ]
         },
         "xhigh": {
-          "outputTokensPerSecond": 95.33,
+          "outputTokensPerSecond": 77.51,
           "effort": "xhigh",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "gpt-5-4",
-            "a89c4b28-2d8c-456e-88ea-255fb51fd2b6",
-            "GPT-5.4 (Xhigh)"
+            "gpt-5-5",
+            "1f054429-397e-4fdb-9e71-67bc92c1735e",
+            "GPT-5.5 (Xhigh)"
           ]
         }
       }
@@ -522,126 +659,6 @@
         "gpt-5-4-mini-medium",
         "392063ba-c3b5-47e8-ba67-a7b0b34f6824",
         "GPT-5.4 mini (Medium)"
-      ]
-    },
-    "gpt-4o-2024-11-20": {
-      "outputTokensPerSecond": 166.37,
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-4o-2024-11-20",
-        "gpt-4o-2024-08-06",
-        "8c1be908-67b6-4cf4-ba08-83ddbe44fde3",
-        "GPT-4o (Aug '24)"
-      ]
-    },
-    "gpt-daybreak-blue-latest": {
-      "outputTokensPerSecond": 112.04,
-      "effort": "low",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-daybreak-blue-latest",
-        "gpt-5-6-sol-low",
-        "0904b596-8932-43bd-9b21-324f128e1723",
-        "GPT-5.6 Sol (Low)"
-      ]
-    },
-    "gpt-5.1": {
-      "outputTokensPerSecond": 101.85,
-      "effort": "high",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-5.1",
-        "gpt-5-1",
-        "4dc12a38-b18f-4c43-8e1b-678f8434b5b1",
-        "GPT-5.1 (High)"
-      ]
-    },
-    "gpt-5.6-luna": {
-      "intelligenceIndex": 23.8,
-      "outputTokensPerSecond": 127.02,
-      "costPerTask": 0.3313,
-      "effort": "max",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-5.6-luna",
-        "gpt-5-6-luna",
-        "426d24c8-49ae-482a-b4a8-20f1c53f21c1",
-        "GPT-5.6 Luna (Max)"
-      ],
-      "benchmarkByEffort": {
-        "none": {
-          "outputTokensPerSecond": 119.03,
-          "effort": "none",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-6-luna-non-reasoning",
-            "dc64f856-3ded-497d-9527-d41d31267ed5",
-            "GPT-5.6 Luna (Non-reasoning)"
-          ]
-        },
-        "low": {
-          "outputTokensPerSecond": 122.27,
-          "effort": "low",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-6-luna-low",
-            "050c61cd-cddc-463a-a30a-a82aaa37be59",
-            "GPT-5.6 Luna (Low)"
-          ]
-        },
-        "medium": {
-          "outputTokensPerSecond": 119.29,
-          "effort": "medium",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-6-luna-medium",
-            "58b812bf-8498-46db-b834-f43ccc614b61",
-            "GPT-5.6 Luna (Medium)"
-          ]
-        },
-        "high": {
-          "outputTokensPerSecond": 122.22,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-6-luna-high",
-            "aa55297e-8fbf-4372-b4ab-9b068dc6396c",
-            "GPT-5.6 Luna (High)"
-          ]
-        },
-        "xhigh": {
-          "outputTokensPerSecond": 123.53,
-          "effort": "xhigh",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-6-luna-xhigh",
-            "87110ff0-1f79-41b4-9976-eda250597317",
-            "GPT-5.6 Luna (Xhigh)"
-          ]
-        },
-        "max": {
-          "intelligenceIndex": 23.8,
-          "outputTokensPerSecond": 127.02,
-          "costPerTask": 0.3313,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-5-6-luna",
-            "426d24c8-49ae-482a-b4a8-20f1c53f21c1",
-            "GPT-5.6 Luna (Max)"
-          ]
-        }
-      }
-    },
-    "gpt-5.2": {
-      "outputTokensPerSecond": 74.04,
-      "effort": "xhigh",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gpt-5.2",
-        "gpt-5-2",
-        "498862c3-f9ac-49d2-852f-16a02bb0c38f",
-        "GPT-5.2 (Xhigh)"
       ]
     },
     "gpt-6-luna": {
@@ -730,115 +747,17 @@
         }
       }
     },
-    "gpt-6-sol": {
-      "intelligenceIndex": 44.2,
-      "outputTokensPerSecond": 150.97,
-      "costPerTask": 2.4658,
+    "claude-fable-5-2": {
+      "intelligenceIndex": 64.6,
+      "outputTokensPerSecond": 92.72,
+      "costPerTask": 26.5386,
       "effort": "max",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gpt-6-sol",
-        "c50ea08c-88c0-4eb7-85b8-27f2bbf6d527",
-        "GPT-6 Sol (Max)"
-      ],
-      "benchmarkByEffort": {
-        "none": {
-          "outputTokensPerSecond": 133.57,
-          "effort": "none",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-6-sol-non-reasoning",
-            "d3e20e76-9e1a-45b6-b809-ad6aa37430cf",
-            "GPT-6 Sol (Non-reasoning)"
-          ]
-        },
-        "low": {
-          "outputTokensPerSecond": 136.8,
-          "effort": "low",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-6-sol-low",
-            "01459872-433a-4ab2-8e99-7083162172eb",
-            "GPT-6 Sol (Low)"
-          ]
-        },
-        "high": {
-          "outputTokensPerSecond": 143.65,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-6-sol-high",
-            "52eebe3e-6ede-4e46-92db-c5dea49fc410",
-            "GPT-6 Sol (High)"
-          ]
-        },
-        "xhigh": {
-          "outputTokensPerSecond": 140.42,
-          "effort": "xhigh",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-6-sol-xhigh",
-            "da2642fe-9f73-4788-b5af-24edcd55b37e",
-            "GPT-6 Sol (Xhigh)"
-          ]
-        },
-        "max": {
-          "intelligenceIndex": 44.2,
-          "outputTokensPerSecond": 150.97,
-          "costPerTask": 2.4658,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gpt-6-sol",
-            "c50ea08c-88c0-4eb7-85b8-27f2bbf6d527",
-            "GPT-6 Sol (Max)"
-          ]
-        }
-      }
-    },
-    "claude-opus-4-8": {
-      "outputTokensPerSecond": 57,
-      "effort": "max",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-opus-4-8",
-        "992b7b84-5069-4c6a-9295-834252553d50",
-        "Claude Opus 4.8 (Max)"
-      ],
-      "benchmarkByEffort": {
-        "max": {
-          "outputTokensPerSecond": 57,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-opus-4-8",
-            "992b7b84-5069-4c6a-9295-834252553d50",
-            "Claude Opus 4.8 (Max)"
-          ]
-        }
-      }
-    },
-    "claude-fable-5": {
-      "outputTokensPerSecond": 61.49,
-      "effort": "max",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-fable-5",
-        "cd55210d-358e-4df1-ba9c-9acb5f186cc9",
-        "Claude Fable 5 (Max, Opus 4.8 Fallback)"
-      ],
-      "benchmarkByEffort": {
-        "max": {
-          "outputTokensPerSecond": 61.49,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-fable-5",
-            "cd55210d-358e-4df1-ba9c-9acb5f186cc9",
-            "Claude Fable 5 (Max, Opus 4.8 Fallback)"
-          ]
-        }
-      }
+        "claude-fable-5-2",
+        "593f2d23-247b-41c9-a679-cebd225f0a9a",
+        "Claude Fable 5.2 (Max, Default Fallback)"
+      ]
     },
     "claude-opus-4-6": {
       "outputTokensPerSecond": 38.91,
@@ -872,53 +791,11 @@
         }
       }
     },
-    "claude-sonnet-4-6": {
-      "outputTokensPerSecond": 42.14,
-      "effort": "high",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-sonnet-4-6",
-        "2e40e695-3cec-43da-83f9-615af30b8e91",
-        "Claude Sonnet 4.6 (Non-reasoning, High)"
-      ],
-      "benchmarkByEffort": {
-        "low": {
-          "outputTokensPerSecond": 42.33,
-          "effort": "low",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-4-6-non-reasoning-low-effort",
-            "f2e21112-192e-4aed-ae82-68ca3b38e667",
-            "Claude Sonnet 4.6 (Non-reasoning, Low)"
-          ]
-        },
-        "high": {
-          "outputTokensPerSecond": 42.14,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-4-6",
-            "2e40e695-3cec-43da-83f9-615af30b8e91",
-            "Claude Sonnet 4.6 (Non-reasoning, High)"
-          ]
-        },
-        "max": {
-          "outputTokensPerSecond": 55.49,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-4-6-adaptive",
-            "df8d14e0-3997-4e4d-b4ad-9c047acc9c69",
-            "Claude Sonnet 4.6 (Max)"
-          ]
-        }
-      }
-    },
-    "claude-opus-4-5": {
+    "claude-opus-4-5-20251101": {
       "outputTokensPerSecond": 46.9,
       "measuredAt": "2026-11-17",
       "aliases": [
-        "claude-opus-4-5",
+        "claude-opus-4-5-20251101",
         "claude-opus-4-5-thinking",
         "2660d74f-ce79-48a8-8b53-6e668e2071a2",
         "Claude Opus 4.5 (Reasoning)"
@@ -998,135 +875,6 @@
         }
       }
     },
-    "claude-opus-4-7": {
-      "outputTokensPerSecond": 44.11,
-      "effort": "high",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-opus-4-7",
-        "claude-opus-4-7-non-reasoning",
-        "2fa8e143-77a8-4d05-bfa8-d3b54634c00f",
-        "Claude Opus 4.7 (Non-reasoning, High)"
-      ],
-      "benchmarkByEffort": {
-        "high": {
-          "outputTokensPerSecond": 44.11,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-opus-4-7-non-reasoning",
-            "2fa8e143-77a8-4d05-bfa8-d3b54634c00f",
-            "Claude Opus 4.7 (Non-reasoning, High)"
-          ]
-        },
-        "max": {
-          "outputTokensPerSecond": 49.13,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-opus-4-7",
-            "e9a09db3-8fd6-41dd-ba2f-20e0a2bff7f2",
-            "Claude Opus 4.7 (Max)"
-          ]
-        }
-      }
-    },
-    "claude-opus-4-5-20251101": {
-      "outputTokensPerSecond": 46.9,
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-opus-4-5-20251101",
-        "claude-opus-4-5-thinking",
-        "2660d74f-ce79-48a8-8b53-6e668e2071a2",
-        "Claude Opus 4.5 (Reasoning)"
-      ]
-    },
-    "claude-sonnet-5-5": {
-      "intelligenceIndex": 54.5,
-      "outputTokensPerSecond": 132.25,
-      "costPerTask": 10.0206,
-      "effort": "max",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-sonnet-5-5",
-        "b171d979-5ec1-45de-b8b9-db1ee65e77ec",
-        "Claude Sonnet 5.5 (Max, Default Fallback)"
-      ],
-      "benchmarkByEffort": {
-        "low": {
-          "intelligenceIndex": 25.6,
-          "outputTokensPerSecond": 101.48,
-          "costPerTask": 0.5113,
-          "effort": "low",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-5-5-low",
-            "bbc2ffea-cf6b-43be-8c41-1769347e234d",
-            "Claude Sonnet 5.5 (Low, Default Fallback)"
-          ]
-        },
-        "medium": {
-          "intelligenceIndex": 30.8,
-          "outputTokensPerSecond": 99.45,
-          "costPerTask": 0.7807,
-          "effort": "medium",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-5-5-medium",
-            "042e8a37-fcd0-40f4-8f41-99215fb68eda",
-            "Claude Sonnet 5.5 (Medium, Default Fallback)"
-          ]
-        },
-        "high": {
-          "intelligenceIndex": 41.5,
-          "outputTokensPerSecond": 99.92,
-          "costPerTask": 1.6361,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-5-5-high",
-            "268525e2-f873-4178-bc07-e6a0ee1f002d",
-            "Claude Sonnet 5.5 (High, Default Fallback)"
-          ]
-        },
-        "xhigh": {
-          "intelligenceIndex": 49.9,
-          "outputTokensPerSecond": 101.81,
-          "costPerTask": 4.092,
-          "effort": "xhigh",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-5-5-xhigh",
-            "975aeaef-50bd-4a65-9c73-f1015adcd4d4",
-            "Claude Sonnet 5.5 (Xhigh, Default Fallback)"
-          ]
-        },
-        "max": {
-          "intelligenceIndex": 54.5,
-          "outputTokensPerSecond": 132.25,
-          "costPerTask": 10.0206,
-          "effort": "max",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-sonnet-5-5",
-            "b171d979-5ec1-45de-b8b9-db1ee65e77ec",
-            "Claude Sonnet 5.5 (Max, Default Fallback)"
-          ]
-        }
-      }
-    },
-    "claude-fable-5-2": {
-      "intelligenceIndex": 64.6,
-      "outputTokensPerSecond": 92.72,
-      "costPerTask": 26.5386,
-      "effort": "max",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "claude-fable-5-2",
-        "593f2d23-247b-41c9-a679-cebd225f0a9a",
-        "Claude Fable 5.2 (Max, Default Fallback)"
-      ]
-    },
     "claude-fable-5-1": {
       "intelligenceIndex": 50,
       "outputTokensPerSecond": 58.63,
@@ -1202,68 +950,117 @@
         }
       }
     },
-    "claude-opus-5": {
-      "intelligenceIndex": 44.2,
-      "outputTokensPerSecond": 52.16,
-      "costPerTask": 11.8215,
-      "effort": "max",
+    "claude-sonnet-4-6": {
+      "outputTokensPerSecond": 42.14,
+      "effort": "high",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "claude-opus-5",
-        "b8fc61f7-5e9a-49e6-8547-6ac56db24627",
-        "Claude Opus 5 (Max)"
+        "claude-sonnet-4-6",
+        "2e40e695-3cec-43da-83f9-615af30b8e91",
+        "Claude Sonnet 4.6 (Non-reasoning, High)"
       ],
       "benchmarkByEffort": {
         "low": {
-          "outputTokensPerSecond": 48.51,
+          "outputTokensPerSecond": 42.33,
           "effort": "low",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-opus-5-low",
-            "20928ba9-3a3f-415f-9519-b84ff64ecf34",
-            "Claude Opus 5 (Low)"
-          ]
-        },
-        "medium": {
-          "outputTokensPerSecond": 50.22,
-          "effort": "medium",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-opus-5-medium",
-            "ff51be8f-e362-4a7e-9043-687ba15de207",
-            "Claude Opus 5 (Medium)"
+            "claude-sonnet-4-6-non-reasoning-low-effort",
+            "f2e21112-192e-4aed-ae82-68ca3b38e667",
+            "Claude Sonnet 4.6 (Non-reasoning, Low)"
           ]
         },
         "high": {
-          "outputTokensPerSecond": 50.03,
+          "outputTokensPerSecond": 42.14,
           "effort": "high",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-opus-5-high",
-            "712be54a-77ae-41b2-9a58-21181479d6ee",
-            "Claude Opus 5 (High)"
-          ]
-        },
-        "xhigh": {
-          "outputTokensPerSecond": 51.23,
-          "effort": "xhigh",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "claude-opus-5-xhigh",
-            "1305c921-7aaa-4d6d-99b5-99b3acf15e19",
-            "Claude Opus 5 (Xhigh)"
+            "claude-sonnet-4-6",
+            "2e40e695-3cec-43da-83f9-615af30b8e91",
+            "Claude Sonnet 4.6 (Non-reasoning, High)"
           ]
         },
         "max": {
-          "intelligenceIndex": 44.2,
-          "outputTokensPerSecond": 52.16,
-          "costPerTask": 11.8215,
+          "outputTokensPerSecond": 55.49,
           "effort": "max",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-opus-5",
-            "b8fc61f7-5e9a-49e6-8547-6ac56db24627",
-            "Claude Opus 5 (Max)"
+            "claude-sonnet-4-6-adaptive",
+            "df8d14e0-3997-4e4d-b4ad-9c047acc9c69",
+            "Claude Sonnet 4.6 (Max)"
+          ]
+        }
+      }
+    },
+    "claude-opus-4-5": {
+      "outputTokensPerSecond": 46.9,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "claude-opus-4-5",
+        "claude-opus-4-5-thinking",
+        "2660d74f-ce79-48a8-8b53-6e668e2071a2",
+        "Claude Opus 4.5 (Reasoning)"
+      ]
+    },
+    "claude-sonnet-5": {
+      "outputTokensPerSecond": 63.2,
+      "effort": "low",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "claude-sonnet-5",
+        "claude-sonnet-5-low",
+        "142b93bf-09c4-42dc-9c3a-50b1a222cbd4",
+        "Claude Sonnet 5 (Low)"
+      ],
+      "benchmarkByEffort": {
+        "low": {
+          "outputTokensPerSecond": 63.2,
+          "effort": "low",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-sonnet-5-low",
+            "142b93bf-09c4-42dc-9c3a-50b1a222cbd4",
+            "Claude Sonnet 5 (Low)"
+          ]
+        },
+        "medium": {
+          "outputTokensPerSecond": 63.74,
+          "effort": "medium",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-sonnet-5-medium",
+            "effcd151-7c31-4437-af3d-e88daeae9385",
+            "Claude Sonnet 5 (Medium)"
+          ]
+        },
+        "high": {
+          "outputTokensPerSecond": 63.53,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-sonnet-5-high",
+            "ba0224cf-0351-4f56-8508-b3f1a740ae4a",
+            "Claude Sonnet 5 (High)"
+          ]
+        },
+        "xhigh": {
+          "outputTokensPerSecond": 66.46,
+          "effort": "xhigh",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-sonnet-5-xhigh",
+            "99f376bf-cbcb-4124-bf3e-6b0a4e6e9bea",
+            "Claude Sonnet 5 (Xhigh)"
+          ]
+        },
+        "max": {
+          "outputTokensPerSecond": 83.33,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-sonnet-5",
+            "23c86e4a-c769-43c0-a056-79e3cd15834f",
+            "Claude Sonnet 5 (Max)"
           ]
         }
       }
@@ -1342,115 +1139,222 @@
         }
       }
     },
-    "claude-sonnet-5": {
-      "outputTokensPerSecond": 63.2,
-      "effort": "low",
+    "claude-sonnet-5-5": {
+      "intelligenceIndex": 54.5,
+      "outputTokensPerSecond": 132.25,
+      "costPerTask": 10.0206,
+      "effort": "max",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "claude-sonnet-5",
-        "claude-sonnet-5-low",
-        "142b93bf-09c4-42dc-9c3a-50b1a222cbd4",
-        "Claude Sonnet 5 (Low)"
+        "claude-sonnet-5-5",
+        "b171d979-5ec1-45de-b8b9-db1ee65e77ec",
+        "Claude Sonnet 5.5 (Max, Default Fallback)"
       ],
       "benchmarkByEffort": {
         "low": {
-          "outputTokensPerSecond": 63.2,
+          "intelligenceIndex": 25.6,
+          "outputTokensPerSecond": 101.48,
+          "costPerTask": 0.5113,
           "effort": "low",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-sonnet-5-low",
-            "142b93bf-09c4-42dc-9c3a-50b1a222cbd4",
-            "Claude Sonnet 5 (Low)"
+            "claude-sonnet-5-5-low",
+            "bbc2ffea-cf6b-43be-8c41-1769347e234d",
+            "Claude Sonnet 5.5 (Low, Default Fallback)"
           ]
         },
         "medium": {
-          "outputTokensPerSecond": 63.74,
+          "intelligenceIndex": 30.8,
+          "outputTokensPerSecond": 99.45,
+          "costPerTask": 0.7807,
           "effort": "medium",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-sonnet-5-medium",
-            "effcd151-7c31-4437-af3d-e88daeae9385",
-            "Claude Sonnet 5 (Medium)"
+            "claude-sonnet-5-5-medium",
+            "042e8a37-fcd0-40f4-8f41-99215fb68eda",
+            "Claude Sonnet 5.5 (Medium, Default Fallback)"
           ]
         },
         "high": {
-          "outputTokensPerSecond": 63.53,
+          "intelligenceIndex": 41.5,
+          "outputTokensPerSecond": 99.92,
+          "costPerTask": 1.6361,
           "effort": "high",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-sonnet-5-high",
-            "ba0224cf-0351-4f56-8508-b3f1a740ae4a",
-            "Claude Sonnet 5 (High)"
+            "claude-sonnet-5-5-high",
+            "268525e2-f873-4178-bc07-e6a0ee1f002d",
+            "Claude Sonnet 5.5 (High, Default Fallback)"
           ]
         },
         "xhigh": {
-          "outputTokensPerSecond": 66.46,
+          "intelligenceIndex": 49.9,
+          "outputTokensPerSecond": 101.81,
+          "costPerTask": 4.092,
           "effort": "xhigh",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-sonnet-5-xhigh",
-            "99f376bf-cbcb-4124-bf3e-6b0a4e6e9bea",
-            "Claude Sonnet 5 (Xhigh)"
+            "claude-sonnet-5-5-xhigh",
+            "975aeaef-50bd-4a65-9c73-f1015adcd4d4",
+            "Claude Sonnet 5.5 (Xhigh, Default Fallback)"
           ]
         },
         "max": {
-          "outputTokensPerSecond": 83.33,
+          "intelligenceIndex": 54.5,
+          "outputTokensPerSecond": 132.25,
+          "costPerTask": 10.0206,
           "effort": "max",
           "measuredAt": "2026-11-17",
           "aliases": [
-            "claude-sonnet-5",
-            "23c86e4a-c769-43c0-a056-79e3cd15834f",
-            "Claude Sonnet 5 (Max)"
+            "claude-sonnet-5-5",
+            "b171d979-5ec1-45de-b8b9-db1ee65e77ec",
+            "Claude Sonnet 5.5 (Max, Default Fallback)"
           ]
         }
       }
     },
-    "gemini-4-hydrogen": {
-      "intelligenceIndex": 53.9,
-      "outputTokensPerSecond": 229.02,
-      "costPerTask": 3.1602,
-      "effort": "xhigh",
+    "claude-opus-4-8": {
+      "outputTokensPerSecond": 57,
+      "effort": "max",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-4-hydrogen",
-        "dad0e3b1-e3e7-477a-99f9-c14457a91114",
-        "Gemini 4 Hydrogen (Xhigh)"
-      ]
+        "claude-opus-4-8",
+        "992b7b84-5069-4c6a-9295-834252553d50",
+        "Claude Opus 4.8 (Max)"
+      ],
+      "benchmarkByEffort": {
+        "max": {
+          "outputTokensPerSecond": 57,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-4-8",
+            "992b7b84-5069-4c6a-9295-834252553d50",
+            "Claude Opus 4.8 (Max)"
+          ]
+        }
+      }
     },
-    "gemini-flash-latest": {
-      "intelligenceIndex": 30.8,
-      "outputTokensPerSecond": 123.67,
-      "costPerTask": 7.766,
+    "claude-opus-5": {
+      "intelligenceIndex": 44.2,
+      "outputTokensPerSecond": 52.16,
+      "costPerTask": 11.8215,
+      "effort": "max",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "claude-opus-5",
+        "b8fc61f7-5e9a-49e6-8547-6ac56db24627",
+        "Claude Opus 5 (Max)"
+      ],
+      "benchmarkByEffort": {
+        "low": {
+          "outputTokensPerSecond": 48.51,
+          "effort": "low",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-5-low",
+            "20928ba9-3a3f-415f-9519-b84ff64ecf34",
+            "Claude Opus 5 (Low)"
+          ]
+        },
+        "medium": {
+          "outputTokensPerSecond": 50.22,
+          "effort": "medium",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-5-medium",
+            "ff51be8f-e362-4a7e-9043-687ba15de207",
+            "Claude Opus 5 (Medium)"
+          ]
+        },
+        "high": {
+          "outputTokensPerSecond": 50.03,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-5-high",
+            "712be54a-77ae-41b2-9a58-21181479d6ee",
+            "Claude Opus 5 (High)"
+          ]
+        },
+        "xhigh": {
+          "outputTokensPerSecond": 51.23,
+          "effort": "xhigh",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-5-xhigh",
+            "1305c921-7aaa-4d6d-99b5-99b3acf15e19",
+            "Claude Opus 5 (Xhigh)"
+          ]
+        },
+        "max": {
+          "intelligenceIndex": 44.2,
+          "outputTokensPerSecond": 52.16,
+          "costPerTask": 11.8215,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-5",
+            "b8fc61f7-5e9a-49e6-8547-6ac56db24627",
+            "Claude Opus 5 (Max)"
+          ]
+        }
+      }
+    },
+    "claude-opus-4-7": {
+      "outputTokensPerSecond": 44.11,
       "effort": "high",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-flash-latest",
-        "gemini-3-8-flash",
-        "8a999846-4c1d-4ce7-a8b7-1310a7166fd7",
-        "Gemini 3.8 Flash (High)"
-      ]
+        "claude-opus-4-7",
+        "claude-opus-4-7-non-reasoning",
+        "2fa8e143-77a8-4d05-bfa8-d3b54634c00f",
+        "Claude Opus 4.7 (Non-reasoning, High)"
+      ],
+      "benchmarkByEffort": {
+        "high": {
+          "outputTokensPerSecond": 44.11,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-4-7-non-reasoning",
+            "2fa8e143-77a8-4d05-bfa8-d3b54634c00f",
+            "Claude Opus 4.7 (Non-reasoning, High)"
+          ]
+        },
+        "max": {
+          "outputTokensPerSecond": 49.13,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-opus-4-7",
+            "e9a09db3-8fd6-41dd-ba2f-20e0a2bff7f2",
+            "Claude Opus 4.7 (Max)"
+          ]
+        }
+      }
     },
-    "gemini-3.1-pro-preview": {
-      "outputTokensPerSecond": 139.44,
+    "claude-fable-5": {
+      "outputTokensPerSecond": 61.49,
+      "effort": "max",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-3.1-pro-preview",
-        "gemini-3-1-pro-preview",
-        "bbd93ebe-80da-4594-bb19-61e69d0331df",
-        "Gemini 3.1 Pro Preview"
-      ]
-    },
-    "gemini-flash-lite-latest": {
-      "intelligenceIndex": 11.7,
-      "outputTokensPerSecond": 427.53,
-      "costPerTask": 0.6929,
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gemini-flash-lite-latest",
-        "gemini-3-5-flash-lite",
-        "093b9df2-ebee-4309-943f-5a7e88360adf",
-        "Gemini 3.5 Flash-Lite"
-      ]
+        "claude-fable-5",
+        "cd55210d-358e-4df1-ba9c-9acb5f186cc9",
+        "Claude Fable 5 (Max, Opus 4.8 Fallback)"
+      ],
+      "benchmarkByEffort": {
+        "max": {
+          "outputTokensPerSecond": 61.49,
+          "effort": "max",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "claude-fable-5",
+            "cd55210d-358e-4df1-ba9c-9acb5f186cc9",
+            "Claude Fable 5 (Max, Opus 4.8 Fallback)"
+          ]
+        }
+      }
     },
     "gemini-3-flash-preview": {
       "outputTokensPerSecond": 208.18,
@@ -1461,18 +1365,6 @@
         "gemini-3-flash",
         "783a0ea2-1eef-422a-8c3d-f6d40d943f54",
         "Gemini 3 Flash Preview (Non-reasoning)"
-      ]
-    },
-    "gemini-3.5-flash-lite": {
-      "intelligenceIndex": 11.7,
-      "outputTokensPerSecond": 427.53,
-      "costPerTask": 0.6929,
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gemini-3.5-flash-lite",
-        "gemini-3-5-flash-lite",
-        "093b9df2-ebee-4309-943f-5a7e88360adf",
-        "Gemini 3.5 Flash-Lite"
       ]
     },
     "gemini-3.5-flash": {
@@ -1518,26 +1410,37 @@
         }
       }
     },
-    "gemini-3.1-flash-lite": {
-      "intelligenceIndex": 6.2,
-      "outputTokensPerSecond": 323.74,
-      "costPerTask": 0.1945,
+    "gemini-flash-lite-latest": {
+      "intelligenceIndex": 11.7,
+      "outputTokensPerSecond": 427.53,
+      "costPerTask": 0.6929,
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-3.1-flash-lite",
-        "gemini-3-1-flash-lite-preview",
-        "598190f8-dc9c-4fea-a7ea-4b81c402ab18",
-        "Gemini 3.1 Flash-Lite"
+        "gemini-flash-lite-latest",
+        "gemini-3-5-flash-lite",
+        "093b9df2-ebee-4309-943f-5a7e88360adf",
+        "Gemini 3.5 Flash-Lite"
       ]
     },
-    "gemini-2.5-flash": {
-      "outputTokensPerSecond": 206.64,
+    "gemini-2.5-flash-lite": {
+      "outputTokensPerSecond": 273.39,
+      "effort": "none",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-2.5-flash",
-        "gemini-2-5-flash-reasoning",
-        "219ed587-60c5-4a48-9517-8480e08d0ca1",
-        "Gemini 2.5 Flash (Reasoning)"
+        "gemini-2.5-flash-lite",
+        "gemini-2-5-flash-lite",
+        "1d81aa1c-64c8-442a-9c41-81b37e407b91",
+        "Gemini 2.5 Flash-Lite (Non-reasoning)"
+      ]
+    },
+    "gemini-3.1-pro-preview": {
+      "outputTokensPerSecond": 139.44,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gemini-3.1-pro-preview",
+        "gemini-3-1-pro-preview",
+        "bbd93ebe-80da-4594-bb19-61e69d0331df",
+        "Gemini 3.1 Pro Preview"
       ]
     },
     "gemini-3.8-flash": {
@@ -1590,29 +1493,6 @@
         }
       }
     },
-    "gemini-3.6-flash": {
-      "outputTokensPerSecond": 194.74,
-      "effort": "high",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "gemini-3.6-flash",
-        "gemini-3-6-flash",
-        "78332c88-fe60-42c8-af9d-3617e44cf1f5",
-        "Gemini 3.6 Flash (High)"
-      ],
-      "benchmarkByEffort": {
-        "high": {
-          "outputTokensPerSecond": 194.74,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "gemini-3-6-flash",
-            "78332c88-fe60-42c8-af9d-3617e44cf1f5",
-            "Gemini 3.6 Flash (High)"
-          ]
-        }
-      }
-    },
     "gemini-4-argon": {
       "intelligenceIndex": 50.4,
       "outputTokensPerSecond": 88.64,
@@ -1637,6 +1517,18 @@
         "Gemini 4 Carbon (High)"
       ]
     },
+    "gemini-3.5-flash-lite": {
+      "intelligenceIndex": 11.7,
+      "outputTokensPerSecond": 427.53,
+      "costPerTask": 0.6929,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gemini-3.5-flash-lite",
+        "gemini-3-5-flash-lite",
+        "093b9df2-ebee-4309-943f-5a7e88360adf",
+        "Gemini 3.5 Flash-Lite"
+      ]
+    },
     "gemini-2.5-pro": {
       "outputTokensPerSecond": 114.66,
       "measuredAt": "2026-11-17",
@@ -1647,27 +1539,74 @@
         "Gemini 2.5 Pro"
       ]
     },
-    "gemini-2.5-flash-lite": {
-      "outputTokensPerSecond": 273.39,
-      "effort": "none",
+    "gemini-3.6-flash": {
+      "outputTokensPerSecond": 194.74,
+      "effort": "high",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-2.5-flash-lite",
-        "gemini-2-5-flash-lite",
-        "1d81aa1c-64c8-442a-9c41-81b37e407b91",
-        "Gemini 2.5 Flash-Lite (Non-reasoning)"
+        "gemini-3.6-flash",
+        "gemini-3-6-flash",
+        "78332c88-fe60-42c8-af9d-3617e44cf1f5",
+        "Gemini 3.6 Flash (High)"
+      ],
+      "benchmarkByEffort": {
+        "high": {
+          "outputTokensPerSecond": 194.74,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "gemini-3-6-flash",
+            "78332c88-fe60-42c8-af9d-3617e44cf1f5",
+            "Gemini 3.6 Flash (High)"
+          ]
+        }
+      }
+    },
+    "gemini-4-hydrogen": {
+      "intelligenceIndex": 53.9,
+      "outputTokensPerSecond": 229.02,
+      "costPerTask": 3.1602,
+      "effort": "xhigh",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gemini-4-hydrogen",
+        "dad0e3b1-e3e7-477a-99f9-c14457a91114",
+        "Gemini 4 Hydrogen (Xhigh)"
       ]
     },
-    "gemini-3.1-flash-lite-preview": {
+    "gemini-3.1-flash-lite": {
       "intelligenceIndex": 6.2,
       "outputTokensPerSecond": 323.74,
       "costPerTask": 0.1945,
       "measuredAt": "2026-11-17",
       "aliases": [
-        "gemini-3.1-flash-lite-preview",
+        "gemini-3.1-flash-lite",
         "gemini-3-1-flash-lite-preview",
         "598190f8-dc9c-4fea-a7ea-4b81c402ab18",
         "Gemini 3.1 Flash-Lite"
+      ]
+    },
+    "gemini-2.5-flash": {
+      "outputTokensPerSecond": 206.64,
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gemini-2.5-flash",
+        "gemini-2-5-flash-reasoning",
+        "219ed587-60c5-4a48-9517-8480e08d0ca1",
+        "Gemini 2.5 Flash (Reasoning)"
+      ]
+    },
+    "gemini-flash-latest": {
+      "intelligenceIndex": 30.8,
+      "outputTokensPerSecond": 123.67,
+      "costPerTask": 7.766,
+      "effort": "high",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "gemini-flash-latest",
+        "gemini-3-8-flash",
+        "8a999846-4c1d-4ce7-a8b7-1310a7166fd7",
+        "Gemini 3.8 Flash (High)"
       ]
     },
     "glm-5-2": {
@@ -1681,17 +1620,41 @@
         "GLM-5.2 (Non-reasoning)"
       ]
     },
-    "deepseek-v4-1-flash-1017": {
-      "intelligenceIndex": 32.6,
-      "outputTokensPerSecond": 172.47,
-      "costPerTask": 0.6021,
-      "effort": "max",
+    "grok-4.7": {
+      "intelligenceIndex": 35.5,
+      "outputTokensPerSecond": 73.6,
+      "costPerTask": 7.7715,
+      "effort": "xhigh",
       "measuredAt": "2026-11-17",
       "aliases": [
-        "deepseek-v4-1-flash-1017",
-        "f151fd0b-2139-40cf-a3ec-995e8cedc592",
-        "DeepSeek V4.1 Flash 1017 (Max)"
+        "grok-4.7",
+        "grok-4-7",
+        "59627802-1546-422c-9a65-65b61c022d36",
+        "Grok 4.7 (Xhigh)"
       ]
+    },
+    "grok-4.5": {
+      "outputTokensPerSecond": 53.25,
+      "effort": "high",
+      "measuredAt": "2026-11-17",
+      "aliases": [
+        "grok-4.5",
+        "grok-4-5",
+        "794f69b5-cede-482b-b1cc-d769478497cd",
+        "Grok 4.5 (High)"
+      ],
+      "benchmarkByEffort": {
+        "high": {
+          "outputTokensPerSecond": 53.25,
+          "effort": "high",
+          "measuredAt": "2026-11-17",
+          "aliases": [
+            "grok-4-5",
+            "794f69b5-cede-482b-b1cc-d769478497cd",
+            "Grok 4.5 (High)"
+          ]
+        }
+      }
     },
     "grok-4.3": {
       "outputTokensPerSecond": 76.51,
@@ -1757,42 +1720,6 @@
             "grok-4-6-xhigh",
             "d6f43d0a-e8c4-447c-9ff7-5cf0a9d59aa3",
             "Grok 4.6 (Xhigh)"
-          ]
-        }
-      }
-    },
-    "grok-4.7": {
-      "intelligenceIndex": 35.5,
-      "outputTokensPerSecond": 73.6,
-      "costPerTask": 7.7715,
-      "effort": "xhigh",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "grok-4.7",
-        "grok-4-7",
-        "59627802-1546-422c-9a65-65b61c022d36",
-        "Grok 4.7 (Xhigh)"
-      ]
-    },
-    "grok-4.5": {
-      "outputTokensPerSecond": 53.25,
-      "effort": "high",
-      "measuredAt": "2026-11-17",
-      "aliases": [
-        "grok-4.5",
-        "grok-4-5",
-        "794f69b5-cede-482b-b1cc-d769478497cd",
-        "Grok 4.5 (High)"
-      ],
-      "benchmarkByEffort": {
-        "high": {
-          "outputTokensPerSecond": 53.25,
-          "effort": "high",
-          "measuredAt": "2026-11-17",
-          "aliases": [
-            "grok-4-5",
-            "794f69b5-cede-482b-b1cc-d769478497cd",
-            "Grok 4.5 (High)"
           ]
         }
       }
